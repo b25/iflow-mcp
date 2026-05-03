@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mcp:
+    build: ..
+    environment:
+      - IFLOW_BASE_URL=${IFLOW_BASE_URL}
+      - IFLOW_ALLOWED_HOSTS=${IFLOW_ALLOWED_HOSTS}
+      - IFLOW_API_BEARER=${IFLOW_API_BEARER}
+      - IFLOW_API_POINTS=${IFLOW_API_POINTS}
+      - IFLOW_MCP_TRANSPORT=http
+      - PORT=3000
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf.sample:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - mcp

@@ -1,0 +1,10 @@
+[mcp.servers.iflow]
+command = "node"
+args = ["/absolute/path/to/iflow-mcp/dist/index.js"]
+
+[mcp.servers.iflow.env]
+IFLOW_BASE_URL = "https://erp.example.com"
+IFLOW_ALLOWED_HOSTS = "erp.example.com"
+IFLOW_API_BEARER = "your-integration-bearer-token"
+IFLOW_API_POINTS = '{"clients":"clients-uuid","products":"products-uuid","stocks":"stocks-uuid","orders":"orders-uuid"}'
+IFLOW_READ_ONLY = "1"
