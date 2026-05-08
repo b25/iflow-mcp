@@ -1,3 +1,7 @@
+# MCP server for iflow ERP. Replace the path in args with your clone.
+# IFLOW_API_POINTS must map every logical tool key the server expects — start from
+# iflow-api-points.sample.json in this folder, then paste one JSON line below.
+
 [mcp.servers.iflow]
 command = "node"
 args = ["/absolute/path/to/iflow-mcp/dist/index.js"]
@@ -6,5 +10,5 @@ args = ["/absolute/path/to/iflow-mcp/dist/index.js"]
 IFLOW_BASE_URL = "https://erp.example.com"
 IFLOW_ALLOWED_HOSTS = "erp.example.com"
 IFLOW_API_BEARER = "your-integration-bearer-token"
-IFLOW_API_POINTS = '{"clients":"clients-uuid","products":"products-uuid","stocks":"stocks-uuid","orders":"orders-uuid"}'
+IFLOW_API_POINTS = '{"list_clients":"00000000-0000-4000-8000-000000000001","list_products":"00000000-0000-4000-8000-000000000002"}'
 IFLOW_READ_ONLY = "1"

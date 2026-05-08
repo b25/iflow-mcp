@@ -1,0 +1,13 @@
+# MCP client examples
+
+CI runs `npm run validate:examples` to ensure every `*.json` file here parses.
+
+- [`iflow-api-points.sample.json`](./iflow-api-points.sample.json) — template for **`IFLOW_API_POINTS`**: one UUID per registered tool key. Replace every value with the real `path_uuid` from iflow **Api Points** admin.
+- [`claude-desktop-config.json`](./claude-desktop-config.json) — `mcpServers` snippet.
+- [`chatgpt-desktop-config.json`](./chatgpt-desktop-config.json) — same `mcpServers` shape for ChatGPT Desktop (Developer Mode / connectors); confirm the live app expects this path — UI labels change, stdio + `env` is the same idea.
+- [`claude-code.mcp.json`](./claude-code.mcp.json) — project `.mcp.json` shape (Claude Code CLI).
+- [`cursor.mcp.json`](./cursor.mcp.json) — place as `.cursor/mcp.json` or merge into user config.
+- [`openai-codex-config.toml`](./openai-codex-config.toml) — Codex CLI TOML.
+- [`gemini-cursor-config.json`](./gemini-cursor-config.json) — same top-level `mcpServers` shape as Cursor / Claude Desktop (Gemini CLI where supported).
+
+Cowork and Claude Code use the same stdio + env pattern as Claude Desktop; point `command` at your built `dist/index.js`.

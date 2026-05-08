@@ -1,0 +1,41 @@
+/**
+ * Keys that must appear in IFLOW_API_POINTS for the registered tool set.
+ * (Orchestrator `where_are_we_losing_money` only calls other tools — no separate UUID.)
+ */
+export const REQUIRED_IFLOW_API_POINT_KEYS = [
+  "list_clients",
+  "get_client",
+  "list_products",
+  "get_product",
+  "get_stock",
+  "count_orders_in_progress",
+  "list_orders_to_invoice",
+  "oldest_unfinished_order",
+  "create_order",
+  "vat_estimate",
+  "supplier_payments_due",
+  "top_products_by_margin",
+  "list_partners",
+  "list_overdue_customers",
+  "latest_offer_for_client",
+  "lost_offers_breakdown",
+  "top_agents",
+  "procurement_today",
+  "orders_by_stage",
+  "order_delay_diagnosis",
+  "hours_worked_per_employee",
+  "daily_activity_summary",
+  "cashflow_summary",
+  "analyze_execution_loss",
+  "analyze_sales_funnel",
+  "analyze_receivables_risk",
+  "analyze_stock_health",
+  "analyze_supplier_drift",
+  "analyze_workflow_efficiency",
+  "analyze_customer_health",
+  "analyze_correction_costs",
+  "diff_diagnose_metric",
+  "diff_diagnose_events",
+] as const;
+
+export type RequiredApiPointKey = (typeof REQUIRED_IFLOW_API_POINT_KEYS)[number];

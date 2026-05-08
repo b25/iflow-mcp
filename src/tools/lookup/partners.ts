@@ -4,36 +4,39 @@ import { iflowClient } from "../../iflow/client.js";
 
 export const listPartnersTool: Tool = {
   name: "list_partners",
-  description: "Get a list of all partners (suppliers/clients).",
+  description: "List partners (suppliers / clients) from iflow.",
   inputSchema: z.object({}),
   execute: async (): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch("partners-uuid", "GET");
+    const result = await iflowClient.fetch<{ results?: unknown[] }>("list_partners", "GET");
     return {
       content: [
         {
           type: "text",
-          text: `Found ${result.results?.length || 0} partners.`,
+          text: `Found ${result.results?.length ?? 0} partner(s).`,
         },
       ],
-      structuredContent: result,
+      structuredContent: result as Record<string, unknown>,
     };
   },
 };
 
 export const listOverdueCustomersTool: Tool = {
   name: "list_overdue_customers",
-  description: "List customers with overdue payments.",
+  description: "Customers with overdue balances (dedicated Api Point).",
   inputSchema: z.object({}),
   execute: async (): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch("overdue-customers-uuid", "GET");
+    const result = await iflowClient.fetch<{ results?: unknown[] }>(
+      "list_overdue_customers",
+      "GET"
+    );
     return {
       content: [
         {
           type: "text",
-          text: `Found ${result.results?.length || 0} customers with overdue payments.`,
+          text: `Found ${result.results?.length ?? 0} overdue customer(s).`,
         },
       ],
-      structuredContent: result,
+      structuredContent: result as Record<string, unknown>,
     };
   },
 };

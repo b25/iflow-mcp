@@ -4,28 +4,43 @@
   "description": "iflow MCP server for Claude, OpenAI, and Gemini",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "iflow-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    ".env.example",
+    "examples",
+    "docs",
+    "ops",
+    "ROTATION.md"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "validate:examples": "node scripts/validate-examples.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.26.0",
-    "express": "^4.19.0",
+    "express": "^4.22.1",
+    "jose": "^5.9.6",
     "pino": "^9.0.0",
-    "uuid": "^9.0.0",
-    "zod": "^3.23.0"
+    "zod": "^3.23.0",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
     "@types/node": "^20.0.0",
-    "@types/uuid": "^9.0.0",
     "pino-pretty": "^11.0.0",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"

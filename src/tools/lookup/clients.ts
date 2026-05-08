@@ -1,54 +1,69 @@
 import { z } from "zod";
 import { Tool, MCPToolResult } from "../shapes.js";
 import { iflowClient } from "../../iflow/client.js";
-import { fetchAllPages } from "../../iflow/pagination.js";
+import { fetchAllPages, PaginatedResponse } from "../../iflow/pagination.js";
+import { config } from "../../iflow/config.js";
 
 export const listClientsTool: Tool = {
   name: "list_clients",
-  description: "Get a list of all clients from iflow ERP.",
+  description:
+    "List clients from iflow (paginated). Use all_pages=true to merge up to IFLOW_MAX_PAGES_PER_CALL pages.",
   inputSchema: z.object({
     all_pages: z.boolean().optional().default(false),
   }),
   execute: async ({ all_pages }): Promise<MCPToolResult> => {
-    const fetchPage = async (page: number) => {
-      // In a real scenario, the path UUID would be mapped from config.IFLOW_API_POINTS
-      // For this task, we assume "clients" maps to a specific UUID
-      return await iflowClient.fetch("clients-uuid", "GET");
-    };
+    const fetchPage = (page: number) =>
+      iflowClient.fetch<PaginatedResponse<Record<string, unknown>>>(
+        "list_clients",
+        "GET",
+        undefined,
+        { query: { page, page_size: 100 } }
+      );
 
-    const results = all_pages 
-      ? await fetchAllPages(fetchPage)
-      : (await fetchPage(1)).results;
+    const first = await fetchPage(1);
+    const rows = all_pages ? await fetchAllPages(fetchPage) : first.results;
 
     return {
-      content: [
-        {
-          type: "text",
-          text: `Found ${results.length} clients.`,
-        },
-      ],
-      structuredContent: results,
+      content: [{ type: "text", text: `Found ${rows.length} client(s).` }],
+      structuredContent: { results: rows, count: rows.length },
     };
   },
 };
 
 export const getClientTool: Tool = {
   name: "get_client",
-  description: "Get detailed information about a specific client.",
+  description:
+    "Find one client by id or uuid by scanning list_clients (up to IFLOW_MAX_PAGES_PER_CALL pages).",
   inputSchema: z.object({
-    uuid: z.string().uuid(),
+    client_id: z.string().min(1),
   }),
-  execute: async ({ uuid }): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch(uuid, "GET");
-
+  execute: async ({ client_id }): Promise<MCPToolResult> => {
+    for (let page = 1; page <= config.IFLOW_MAX_PAGES_PER_CALL; page++) {
+      const res = await iflowClient.fetch<PaginatedResponse<Record<string, unknown>>>(
+        "list_clients",
+        "GET",
+        undefined,
+        { query: { page, page_size: 100 } }
+      );
+      const row = res.results?.find(
+        (r) =>
+          String(r.id) === client_id ||
+          String(r.uuid ?? "") === client_id ||
+          String(r.pk ?? "") === client_id
+      );
+      if (row) {
+        return {
+          content: [{ type: "text", text: `Client ${client_id} found.` }],
+          structuredContent: { data: row },
+        };
+      }
+      if (!res.next) break;
+    }
     return {
       content: [
-        {
-          type: "text",
-          text: `Details for client ${result.name || uuid}.`,
-        },
+        { type: "text", text: `Client ${client_id} not found in scanned pages.` },
       ],
-      structuredContent: result,
+      isError: true,
     };
   },
 };

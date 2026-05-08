@@ -14,9 +14,10 @@ import {
 export const whereAreWeLosingMoneyTool: Tool = {
   name: "where_are_we_losing_money",
   description: "Orchestrate all 8 analyst perspectives to find major financial leakages.",
-  inputSchema: z.object({}),
-  execute: async (): Promise<MCPToolResult> => {
-    // Call all in parallel (simulated orchestration)
+  inputSchema: z.object({
+    language: z.enum(["ro", "en"]).optional().default("ro"),
+  }),
+  execute: async ({ language }): Promise<MCPToolResult> => {
     const tools = [
       analyzeExecutionLoss,
       analyzeSalesFunnel,
@@ -25,30 +26,48 @@ export const whereAreWeLosingMoneyTool: Tool = {
       analyzeSupplierDrift,
       analyzeWorkflowEfficiency,
       analyzeCustomerHealth,
-      analyzeCorrectionCosts
+      analyzeCorrectionCosts,
     ];
 
     const results = await Promise.all(
-      tools.map(t => t.execute({}).catch(e => ({ isError: true, content: [{ type: "text", text: e.message }] })))
+      tools.map((t) =>
+        t.execute({ language }).catch((e: Error) => ({
+          isError: true,
+          content: [{ type: "text" as const, text: e.message }],
+        }))
+      )
     );
 
-    // Rank by severity if available in structuredContent
     const allFindings = results
-      .filter(r => !(r as any).isError && (r as any).structuredContent)
-      .flatMap(r => ((r as any).structuredContent as any).findings || []);
+      .filter((r) => !(r as { isError?: boolean }).isError && (r as { structuredContent?: unknown }).structuredContent)
+      .flatMap(
+        (r) =>
+          ((r as { structuredContent?: { findings?: unknown[] } }).structuredContent?.findings ??
+            []) as Array<{ severity?: string; evidence?: { n_observations?: number } }>
+      );
 
-    const topFindings = allFindings
-      .sort((a, b) => {
-        const severityMap = { high: 3, medium: 2, low: 1 };
-        return severityMap[b.severity as keyof typeof severityMap] - severityMap[a.severity as keyof typeof severityMap];
-      })
-      .slice(0, 3);
+    const severityMap = { high: 3, medium: 2, low: 1 };
+    const bySeverity = (a: { severity?: string }, b: { severity?: string }) =>
+      (severityMap[b.severity as keyof typeof severityMap] ?? 1) -
+      (severityMap[a.severity as keyof typeof severityMap] ?? 1);
+
+    const highSignal = allFindings.filter((f) => {
+      const n = f.evidence?.n_observations;
+      return typeof n !== "number" || n >= 10;
+    });
+    const pool = highSignal.length > 0 ? highSignal : allFindings;
+    const topFindings = [...pool].sort(bySeverity).slice(0, 3);
+
+    const summaryText =
+      language === "en"
+        ? `Aggregated ${allFindings.length} observations across 8 perspectives. Top 3 priorities (preferring n≥10) are in structuredContent.`
+        : `Am agregat ${allFindings.length} observații din 8 perspective. Primele 3 priorități (preferință pentru n≥10): mai jos în structuredContent.`;
 
     return {
       content: [
         {
           type: "text",
-          text: `Found ${allFindings.length} issues across 8 perspectives. Top 3 prioritized below.`,
+          text: summaryText,
         },
       ],
       structuredContent: {

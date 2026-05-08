@@ -1,19 +1,67 @@
-server {
-    listen 80;
-    server_name mcp.iflow.example;
+# Sample reverse proxy for iflow-mcp (IFLOW_MCP_TRANSPORT=http).
+# Terminate TLS at this nginx; MCP listens on plain HTTP on 127.0.0.1 only.
 
-    location / {
-        proxy_pass http://mcp:3000;
+upstream iflow_mcp {
+    server 127.0.0.1:3000;
+    keepalive 8;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name mcp.example.com;
+
+    # ssl_certificate     /etc/nginx/certs/fullchain.pem;
+    # ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+    client_max_body_size 4m;
+
+    # No broad CORS for MCP; frontends should call your BFF, not the browser to MCP.
+    add_header X-Content-Type-Options nosniff always;
+
+    location /healthz {
+        proxy_pass http://iflow_mcp;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Request-Id $http_x_request_id;
+    }
+
+    location /readyz {
+        proxy_pass http://iflow_mcp;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Request-Id $http_x_request_id;
+    }
+
+    location /sse {
+        proxy_pass http://iflow_mcp;
+        proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # SSE support
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
+        proxy_set_header X-Request-Id $http_x_request_id;
+        proxy_set_header Authorization $http_authorization;
+        proxy_set_header DPoP $http_dpop;
         proxy_buffering off;
-        proxy_cache off;
-        proxy_read_timeout 1h;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        chunked_transfer_encoding off;
     }
+
+    location /messages {
+        proxy_pass http://iflow_mcp;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Request-Id $http_x_request_id;
+        proxy_set_header Authorization $http_authorization;
+        proxy_set_header DPoP $http_dpop;
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+    }
+
+    # Optional: rate limit POST /messages (adjust zone in http {} context)
+    # limit_req_zone $binary_remote_addr zone=mcp_msg:10m rate=10r/s;
+    # location /messages {
+    #     limit_req zone=mcp_msg burst=20 nodelay;
+    #     ...
+    # }
 }

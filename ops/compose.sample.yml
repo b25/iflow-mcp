@@ -1,22 +1,25 @@
-version: '3.8'
+# Sample Compose stack: build iflow-mcp and expose HTTP (place behind TLS proxy).
+# Copy to compose.yml, set env_file, and replace image/build as needed.
 
 services:
-  mcp:
-    build: ..
+  iflow-mcp:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: iflow-mcp:local
+    restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
-      - IFLOW_BASE_URL=${IFLOW_BASE_URL}
-      - IFLOW_ALLOWED_HOSTS=${IFLOW_ALLOWED_HOSTS}
-      - IFLOW_API_BEARER=${IFLOW_API_BEARER}
-      - IFLOW_API_POINTS=${IFLOW_API_POINTS}
-      - IFLOW_MCP_TRANSPORT=http
-      - PORT=3000
-    restart: always
-
-  nginx:
-    image: nginx:alpine
+      NODE_ENV: production
+      IFLOW_MCP_TRANSPORT: http
+      IFLOW_HTTP_BIND_HOST: "0.0.0.0"
+      PORT: "3000"
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf.sample:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - mcp
+      # Prefer not publishing publicly; use an internal network + edge proxy.
+      - "127.0.0.1:3000:3000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

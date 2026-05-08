@@ -14,6 +14,8 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
 
 ENV NODE_ENV=production
+ENV IFLOW_MCP_TRANSPORT=http
+ENV IFLOW_HTTP_BIND_HOST=0.0.0.0
 EXPOSE 3000
-USER 1000
+# Distroless node image runs as non-root by default
 CMD ["dist/index.js"]

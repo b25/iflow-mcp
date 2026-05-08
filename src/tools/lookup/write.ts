@@ -5,15 +5,18 @@ import { config } from "../../iflow/config.js";
 
 export const createOrderTool: Tool = {
   name: "create_order",
-  description: "Create a new order in iflow ERP. Requires read-only mode to be disabled.",
+  description:
+    "Create an order in iflow (POST). Disabled when IFLOW_READ_ONLY=1. Sends Idempotency-Key header.",
   inputSchema: z.object({
     client_uuid: z.string().uuid(),
-    items: z.array(z.object({
-      product_uuid: z.string().uuid(),
-      quantity: z.number().positive(),
-      price: z.number().optional(),
-    })),
-    idempotency_key: z.string(),
+    items: z.array(
+      z.object({
+        product_uuid: z.string().uuid(),
+        quantity: z.number().positive(),
+        price: z.number().optional(),
+      })
+    ),
+    idempotency_key: z.string().min(8),
   }),
   execute: async (args): Promise<MCPToolResult> => {
     if (config.IFLOW_READ_ONLY) {
@@ -21,7 +24,7 @@ export const createOrderTool: Tool = {
         content: [
           {
             type: "text",
-            text: "Error: Cannot create order because server is in READ-ONLY mode.",
+            text: "Cannot create order: IFLOW_READ_ONLY=1.",
           },
         ],
         isError: true,
@@ -29,15 +32,18 @@ export const createOrderTool: Tool = {
     }
 
     const { idempotency_key, ...orderData } = args;
-
-    // We assume there's a generic orders endpoint for POST
-    const result = await iflowClient.fetch("orders-uuid", "POST", orderData);
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "create_order",
+      "POST",
+      orderData,
+      { idempotencyKey: idempotency_key }
+    );
 
     return {
       content: [
         {
           type: "text",
-          text: `Order ${result.number || result.uuid} created successfully.`,
+          text: `Order created: ${String(result.number ?? result.uuid ?? "ok")}.`,
         },
       ],
       structuredContent: result,

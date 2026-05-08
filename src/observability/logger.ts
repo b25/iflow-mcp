@@ -1,8 +1,17 @@
 import pino from "pino";
-import { config } from "../iflow/config.js";
+
+const level =
+  (process.env.IFLOW_LOG_LEVEL as
+    | "fatal"
+    | "error"
+    | "warn"
+    | "info"
+    | "debug"
+    | "trace"
+    | undefined) ?? "info";
 
 export const logger = pino({
-  level: config.IFLOW_LOG_LEVEL,
+  level,
   redact: {
     paths: [
       "req.headers.authorization",
@@ -12,10 +21,13 @@ export const logger = pino({
     ],
     remove: true,
   },
-  transport: process.env.NODE_ENV === "development" ? {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-    },
-  } : undefined,
+  transport:
+    process.env.NODE_ENV === "development"
+      ? {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+          },
+        }
+      : undefined,
 });

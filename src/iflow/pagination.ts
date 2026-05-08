@@ -8,13 +8,14 @@ export interface PaginatedResponse<T> {
 }
 
 export async function fetchAllPages<T>(
-  fetchPage: (page: number) => Promise<PaginatedResponse<T>>
+  fetchPage: (page: number) => Promise<PaginatedResponse<T>>,
+  maxPages: number = config.IFLOW_MAX_PAGES_PER_CALL
 ): Promise<T[]> {
   const allResults: T[] = [];
   let currentPage = 1;
   let hasNext = true;
 
-  while (hasNext && currentPage <= config.IFLOW_MAX_PAGES_PER_CALL) {
+  while (hasNext && currentPage <= maxPages) {
     const response = await fetchPage(currentPage);
     allResults.push(...response.results);
     hasNext = !!response.next;
