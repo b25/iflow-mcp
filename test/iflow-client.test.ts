@@ -4,6 +4,7 @@ import { IFlowClient } from "../src/iflow/client.js";
 
 const testCfg: AppConfig = {
   IFLOW_BASE_URL: "https://ok.example.com",
+  IFLOW_ALLOW_INSECURE_HTTP: false,
   IFLOW_ALLOWED_HOSTS: ["ok.example.com"],
   IFLOW_API_BEARER: "test-bearer-token",
   IFLOW_API_POINTS: {
@@ -20,6 +21,7 @@ const testCfg: AppConfig = {
   IFLOW_BFF_ONLY: false,
   IFLOW_BFF_SHARED_SECRET: undefined,
   IFLOW_DPOP_REPLAY_CACHE: "memory",
+  IFLOW_HTTP_BIND_HOST: "127.0.0.1",
 };
 
 describe("IFlowClient", () => {
@@ -79,6 +81,30 @@ describe("IFlowClient", () => {
           Authorization: "Bearer test-bearer-token",
           "Idempotency-Key": "idem-key-123",
           "Content-Type": "application/json",
+        }),
+      })
+    );
+  });
+
+  it("sends X-MCP-Confirm-Token when confirmToken option is set", async () => {
+    const client = new IFlowClient(testCfg);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      )
+    );
+    await client.fetch("list_clients", "GET", undefined, { confirmToken: "ct-secret" });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://ok.example.com/api-external/v1/00000000-0000-4000-8000-000000000000/",
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({
+          Authorization: "Bearer test-bearer-token",
+          "X-MCP-Confirm-Token": "ct-secret",
         }),
       })
     );

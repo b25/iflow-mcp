@@ -96,6 +96,7 @@ For tools that are not plain **Clients / Products / Orders** list endpoints, the
 - **Analyst narrative language** — `analyze_*`, `diff_diagnose`, and `where_are_we_losing_money` accept optional tool input `language`: `ro` (default) or `en`.
 - **Request correlation (HTTP)** — tool completion logs include `requestId` when running inside the remote transport (matches response `X-Request-Id`).
 - **HTTPS** for `IFLOW_BASE_URL` by default; **`IFLOW_ALLOW_INSECURE_HTTP=1`** opts into `http://` for local dev only
+- **PromoArt two-phase confirmation** — if api-external returns **`403`** with **`code: confirmation_required`**, complete the same logical Api Point with **`iflow-mcp confirm --key <IFLOW_API_POINTS key> --token <confirm_token>`** (sends `X-MCP-Confirm-Token`). MCP tools map that error to a short user message (no token echoed). Error logs redact `details.confirm_token` / `pending_id`.
 - **Host allowlist** (`IFLOW_ALLOWED_HOSTS`) and `redirect: manual` on the HTTP client
 - **Log redaction** for `Authorization` headers (pino)
 - **Read-only mode** via `IFLOW_READ_ONLY=1` (disables `create_order`)

@@ -33,4 +33,26 @@ describe("mapIFlowError", () => {
     const m = mapIFlowError(e);
     expect(String(m.message)).toMatch(/timeout/i);
   });
+
+  it("maps confirmation_required to InvalidRequest with CLI hint", () => {
+    const err = new IFlowHttpError("wrapped", 403, {
+      code: "confirmation_required",
+      message: "Operator approval required",
+      details: { confirm_token: "x", pending_id: "y" },
+    });
+    const m = mapIFlowError(err);
+    expect(m.code).toBe(ErrorCode.InvalidRequest);
+    expect(String(m.message)).toContain("Operator approval");
+    expect(String(m.message)).toContain("iflow-mcp confirm");
+  });
+
+  it("maps invalid_mcp_confirm_token to InvalidRequest", () => {
+    const err = new IFlowHttpError("x", 403, {
+      code: "invalid_mcp_confirm_token",
+      message: "Token invalid",
+    });
+    const m = mapIFlowError(err);
+    expect(m.code).toBe(ErrorCode.InvalidRequest);
+    expect(String(m.message)).toContain("Token invalid");
+  });
 });

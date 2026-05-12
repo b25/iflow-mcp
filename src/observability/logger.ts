@@ -18,6 +18,8 @@ export const logger = pino({
       "err.headers.authorization",
       "res.headers.authorization",
       "args.IFLOW_API_BEARER",
+      "errorData.details.confirm_token",
+      "errorData.details.pending_id",
     ],
     remove: true,
   },

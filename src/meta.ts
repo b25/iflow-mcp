@@ -23,6 +23,7 @@ export function handleCliArgs(argv: string[] = process.argv): boolean {
 
 Usage:
   iflow-mcp                    Start server (stdio unless IFLOW_MCP_TRANSPORT=http)
+  iflow-mcp confirm --key K --token T   Repeat GET for Api Point key K with X-MCP-Confirm-Token (two-phase / PromoArt)
   iflow-mcp --version, -v      Print version
   iflow-mcp --help, -h       Show this help
 

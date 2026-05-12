@@ -6,7 +6,7 @@ CI runs `npm run validate:examples` to ensure every `*.json` file here parses.
 - [`claude-desktop-config.json`](./claude-desktop-config.json) — `mcpServers` snippet.
 - [`chatgpt-desktop-config.json`](./chatgpt-desktop-config.json) — same `mcpServers` shape for ChatGPT Desktop (Developer Mode / connectors); confirm the live app expects this path — UI labels change, stdio + `env` is the same idea.
 - [`claude-code.mcp.json`](./claude-code.mcp.json) — project `.mcp.json` shape (Claude Code CLI).
-- [`cursor.mcp.json`](./cursor.mcp.json) — place as `.cursor/mcp.json` or merge into user config.
+- [`cursor.local-http.mcp.json`](./cursor.local-http.mcp.json) — Cursor snippet for **local Django over HTTP** (`IFLOW_ALLOW_INSECURE_HTTP=1`, `localhost`).
 - [`openai-codex-config.toml`](./openai-codex-config.toml) — Codex CLI TOML.
 - [`gemini-cursor-config.json`](./gemini-cursor-config.json) — same top-level `mcpServers` shape as Cursor / Claude Desktop (Gemini CLI where supported).
 

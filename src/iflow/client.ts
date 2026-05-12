@@ -2,10 +2,13 @@ import type { AppConfig } from "./parse-env.js";
 import { config } from "./config.js";
 import { logger } from "../observability/logger.js";
 import { resolveApiPoint } from "./resolve.js";
+import { redactIflowErrorBodyForLog } from "./redact-log.js";
 
 export type IFlowFetchOptions = {
   query?: Record<string, string | number | boolean | undefined>;
   idempotencyKey?: string;
+  /** PromoArt two-phase: repeat GET with `X-MCP-Confirm-Token` (or query `mcp_confirm` — prefer header). */
+  confirmToken?: string;
 };
 
 /** Non-2xx response from iflow api-external (optional K1.3 `{ code, message, details }` body). */
@@ -105,6 +108,9 @@ export class IFlowClient {
         Authorization: `Bearer ${this.bearer}`,
         Accept: "application/json",
       };
+      if (options?.confirmToken) {
+        headers["X-MCP-Confirm-Token"] = options.confirmToken;
+      }
       if (method === "POST") {
         headers["Content-Type"] = "application/json";
         if (options?.idempotencyKey) {
@@ -150,7 +156,10 @@ export class IFlowClient {
         } catch {
           /* keep text */
         }
-        logger.error({ status: response.status, errorData: parsed }, "iflow API error");
+        logger.error(
+          { status: response.status, errorData: redactIflowErrorBodyForLog(parsed) },
+          "iflow API error"
+        );
         const msgFromBody =
           parsed &&
           typeof parsed === "object" &&
