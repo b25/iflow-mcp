@@ -55,10 +55,10 @@ const configSchema = z
       .string()
       .optional()
       .transform((s) => parseInt(s || "5", 10)),
-    IFLOW_LOG_LEVEL: z
-      .enum(["fatal", "error", "warn", "info", "debug", "trace"])
+    IFLOW_MCP_TRANSPORT: z
+      .enum(["stdio", "http"])
       .optional()
-      .default("info"),
+      .default("stdio"),
     IFLOW_OAUTH_ISSUER: z.string().url().optional(),
     IFLOW_OAUTH_JWKS_URL: z.string().url().optional(),
     IFLOW_MCP_AUDIENCE: z.string().url().optional(),
@@ -93,7 +93,16 @@ const configSchema = z
         "IFLOW_BASE_URL must use https:// (set IFLOW_ALLOW_INSECURE_HTTP=1 only for trusted local dev)",
       path: ["IFLOW_BASE_URL"],
     }
-  );
+  )
+  .superRefine((data, ctx) => {
+    if (data.IFLOW_BFF_ONLY && !(data.IFLOW_BFF_SHARED_SECRET ?? "").trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "IFLOW_BFF_ONLY=1 requires a non-empty IFLOW_BFF_SHARED_SECRET",
+        path: ["IFLOW_BFF_SHARED_SECRET"],
+      });
+    }
+  });
 
 export type AppConfig = z.infer<typeof configSchema>;
 

@@ -15,6 +15,7 @@
     "examples",
     "docs",
     "ops",
+    "scripts/mcp-contract-check.mjs",
     "ROTATION.md"
   ],
   "engines": {
@@ -28,7 +29,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
-    "validate:examples": "node scripts/validate-examples.mjs"
+    "validate:examples": "node scripts/validate-examples.mjs",
+    "check:mcp-contract": "node scripts/mcp-contract-check.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.26.0",

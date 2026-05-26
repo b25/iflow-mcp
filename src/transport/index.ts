@@ -28,7 +28,7 @@ function installHttpShutdown(httpServer: HttpServer): void {
 export async function runServer(server: Server) {
   if (process.env.IFLOW_MCP_TRANSPORT === "http") {
     logger.info("Starting Remote MCP (HTTP) server");
-    const httpServer = startRemoteServer(server);
+    const httpServer = startRemoteServer();
     installHttpShutdown(httpServer);
   } else {
     logger.info("Starting Desktop MCP (stdio) server");

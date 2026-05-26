@@ -1,16 +1,25 @@
 import { randomUUID } from "node:crypto";
 import type { Server as HttpServer } from "node:http";
-import express, { type Express, Request, Response } from "express";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import type { Server as McpServer } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import express, { type Express, Request, Response } from "express";
 import { logger } from "../observability/logger.js";
 import { runReadinessChecks } from "../observability/readiness.js";
 import { config } from "../iflow/config.js";
 import { verifyAccessToken, type MCPTokenClaims } from "../auth/jwt.js";
 import { verifyDPoP } from "../auth/dpop.js";
 import { mcpAuthContext } from "../context/mcp-auth-context.js";
+import { handleDjangoBffJsonRpc } from "./django-bff-jsonrpc.js";
+import { createConfiguredMcpServer } from "../mcp-server-factory.js";
 
 type AuthedRequest = Request & { auth: MCPTokenClaims };
+
+type SessionEntry = {
+  transport: SSEServerTransport;
+  server: McpServer;
+};
+
+const sseSessions = new Map<string, SessionEntry>();
 
 function runWithMcpAuth(
   req: Request,
@@ -28,8 +37,15 @@ function runWithMcpAuth(
   );
 }
 
+function sessionIdFromQuery(req: Request): string {
+  const raw = req.query.sessionId;
+  if (typeof raw === "string") return raw.trim();
+  if (Array.isArray(raw) && typeof raw[0] === "string") return raw[0].trim();
+  return "";
+}
+
 /** Express app for remote MCP (SSE + messages). Does not call `listen`. */
-export function createRemoteMcpApp(server: Server): Express {
+export function createRemoteMcpApp(): Express {
   const app = express();
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
@@ -57,8 +73,6 @@ export function createRemoteMcpApp(server: Server): Express {
     res.json({ status: "ready", checks });
   });
 
-  let transport: SSEServerTransport | null = null;
-
   async function requireAuth(
     req: Request,
     res: Response,
@@ -82,8 +96,18 @@ export function createRemoteMcpApp(server: Server): Express {
       }
 
       if (config.IFLOW_BFF_ONLY) {
-        const bffSecret = req.headers["x-bff-secret"];
-        if (bffSecret !== config.IFLOW_BFF_SHARED_SECRET) {
+        const expected = (config.IFLOW_BFF_SHARED_SECRET ?? "").trim();
+        if (!expected) {
+          throw new Error("IFLOW_BFF_ONLY is enabled but IFLOW_BFF_SHARED_SECRET is not configured");
+        }
+        const raw = req.headers["x-bff-secret"];
+        const bffSecret =
+          typeof raw === "string"
+            ? raw.trim()
+            : Array.isArray(raw)
+              ? (raw[0] ?? "").trim()
+              : "";
+        if (bffSecret !== expected) {
           throw new Error("BFF-only mode enabled; invalid BFF secret");
         }
       }
@@ -97,32 +121,58 @@ export function createRemoteMcpApp(server: Server): Express {
     }
   }
 
+  /** Django BFF: JSON-RPC tools/list + tools/call on POST / (no SSE session). */
+  app.post("/", requireAuth, async (req: Request, res: Response) => {
+    const claims = (req as AuthedRequest).auth;
+    await handleDjangoBffJsonRpc(req, res, claims);
+  });
+
   app.get("/sse", requireAuth, async (req: Request, res: Response) => {
     const claims = (req as AuthedRequest).auth;
     await runWithMcpAuth(req, claims, async () => {
-      logger.info("New SSE connection for remote MCP");
-      transport = new SSEServerTransport("/messages", res);
-      await server.connect(transport);
+      const mcpServer = createConfiguredMcpServer();
+      const transport = new SSEServerTransport("/messages", res);
+      const sid = transport.sessionId;
+
+      transport.onclose = () => {
+        sseSessions.delete(sid);
+        void mcpServer.close().catch((err: unknown) => {
+          logger.warn({ err, sessionId: sid }, "MCP server close after SSE end");
+        });
+      };
+
+      sseSessions.set(sid, { transport, server: mcpServer });
+      try {
+        logger.info({ sessionId: sid }, "New SSE connection for remote MCP");
+        await mcpServer.connect(transport);
+      } catch (err) {
+        sseSessions.delete(sid);
+        logger.error(err, "MCP SSE connect failed");
+        if (!res.headersSent) {
+          res.status(500).json({ error: "MCP connection failed" });
+        }
+      }
     });
   });
 
   app.post("/messages", requireAuth, async (req: Request, res: Response) => {
-    const activeTransport = transport;
-    if (!activeTransport) {
-      res.status(400).json({ error: "No SSE connection established" });
+    const sid = sessionIdFromQuery(req);
+    const entry = sid ? sseSessions.get(sid) : undefined;
+    if (!entry) {
+      res.status(400).json({ error: "Unknown or expired sessionId; open GET /sse first" });
       return;
     }
     const claims = (req as AuthedRequest).auth;
     await runWithMcpAuth(req, claims, async () => {
-      await activeTransport.handlePostMessage(req, res);
+      await entry.transport.handlePostMessage(req, res);
     });
   });
 
   return app;
 }
 
-export function startRemoteServer(server: Server): HttpServer {
-  const app = createRemoteMcpApp(server);
+export function startRemoteServer(): HttpServer {
+  const app = createRemoteMcpApp();
   const rawPort = parseInt(process.env.PORT ?? "3000", 10);
   const port = Number.isFinite(rawPort) && rawPort > 0 ? rawPort : 3000;
   const host = config.IFLOW_HTTP_BIND_HOST;

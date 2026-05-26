@@ -92,4 +92,28 @@ describe("parseEnv", () => {
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.data.IFLOW_HTTP_BIND_HOST).toBe("127.0.0.1");
   });
+
+  it("rejects IFLOW_BFF_ONLY=1 without IFLOW_BFF_SHARED_SECRET", () => {
+    const r = parseEnv({
+      IFLOW_BASE_URL: "https://erp.example.com",
+      IFLOW_ALLOWED_HOSTS: "erp.example.com",
+      IFLOW_API_BEARER: "t",
+      IFLOW_API_POINTS: "{}",
+      IFLOW_BFF_ONLY: "1",
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it("allows IFLOW_BFF_ONLY=1 with non-empty IFLOW_BFF_SHARED_SECRET", () => {
+    const r = parseEnv({
+      IFLOW_BASE_URL: "https://erp.example.com",
+      IFLOW_ALLOWED_HOSTS: "erp.example.com",
+      IFLOW_API_BEARER: "t",
+      IFLOW_API_POINTS: "{}",
+      IFLOW_BFF_ONLY: "1",
+      IFLOW_BFF_SHARED_SECRET: "  s3cret  ",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.IFLOW_BFF_SHARED_SECRET).toBe("  s3cret  ");
+  });
 });

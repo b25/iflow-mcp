@@ -22,6 +22,7 @@ const testCfg: AppConfig = {
   IFLOW_BFF_SHARED_SECRET: undefined,
   IFLOW_DPOP_REPLAY_CACHE: "memory",
   IFLOW_HTTP_BIND_HOST: "127.0.0.1",
+  IFLOW_MCP_TRANSPORT: "stdio",
   IFLOW_MCP_INTEGRATION_UUID: undefined,
 };
 

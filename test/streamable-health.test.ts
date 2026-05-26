@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import type { Server as HttpServer } from "node:http";
-import { Server as McpServer } from "@modelcontextprotocol/sdk/server/index.js";
 import { createRemoteMcpApp } from "../src/transport/streamable.js";
 
 function listen(app: ReturnType<typeof createRemoteMcpApp>): Promise<HttpServer> {
@@ -18,11 +17,7 @@ async function closeServer(s: HttpServer): Promise<void> {
 
 describe("createRemoteMcpApp", () => {
   it("GET /healthz and /readyz succeed without Authorization", async () => {
-    const mcp = new McpServer(
-      { name: "iflow-mcp-test", version: "0" },
-      { capabilities: { tools: {} } }
-    );
-    const app = createRemoteMcpApp(mcp);
+    const app = createRemoteMcpApp();
     const httpServer = await listen(app);
     try {
       const addr = httpServer.address();
@@ -50,6 +45,7 @@ describe("createRemoteMcpApp", () => {
       expect(readyBody.checks).toMatchObject({
         config: "ok",
         oauth: "not_configured",
+        transport: "stdio",
       });
     } finally {
       await closeServer(httpServer);
@@ -57,11 +53,7 @@ describe("createRemoteMcpApp", () => {
   });
 
   it("GET /sse without Authorization returns 401", async () => {
-    const mcp = new McpServer(
-      { name: "iflow-mcp-test", version: "0" },
-      { capabilities: { tools: {} } }
-    );
-    const app = createRemoteMcpApp(mcp);
+    const app = createRemoteMcpApp();
     const httpServer = await listen(app);
     try {
       const addr = httpServer.address();
@@ -69,6 +61,25 @@ describe("createRemoteMcpApp", () => {
         throw new Error("expected TCP address");
       }
       const res = await fetch(`http://127.0.0.1:${addr.port}/sse`);
+      expect(res.status).toBe(401);
+    } finally {
+      await closeServer(httpServer);
+    }
+  });
+
+  it("POST / without Authorization returns 401", async () => {
+    const app = createRemoteMcpApp();
+    const httpServer = await listen(app);
+    try {
+      const addr = httpServer.address();
+      if (addr === null || typeof addr === "string") {
+        throw new Error("expected TCP address");
+      }
+      const res = await fetch(`http://127.0.0.1:${addr.port}/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
+      });
       expect(res.status).toBe(401);
     } finally {
       await closeServer(httpServer);

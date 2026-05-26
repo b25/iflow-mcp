@@ -3,24 +3,30 @@ import { config } from "../iflow/config.js";
 export type ReadinessChecks = Record<string, string>;
 
 /** Optional overrides for tests; omit to use `config` OAuth fields. */
-export type OAuthConfigInput = {
+export type ReadinessInput = {
   issuer?: string | undefined;
   jwksUrl?: string | undefined;
   audience?: string | undefined;
+  /** Override transport for readiness (defaults from `config.IFLOW_MCP_TRANSPORT`). */
+  mcpTransport?: "stdio" | "http";
 };
 
 /**
  * Readiness for remote MCP: config loaded, and if OAuth is enabled (all three
  * vars set), JWKS URL must return a document with a `keys` array.
+ *
+ * When `IFLOW_MCP_TRANSPORT=http`, OAuth must be fully configured (JWKS reachable);
+ * stdio-only desktop mode may omit OAuth (`not_configured` is still ready).
  */
 export async function runReadinessChecks(
-  oauthInput: OAuthConfigInput = {}
+  input: ReadinessInput = {}
 ): Promise<{ ready: boolean; checks: ReadinessChecks }> {
-  const issuer = oauthInput.issuer ?? config.IFLOW_OAUTH_ISSUER;
-  const jwksUrl = oauthInput.jwksUrl ?? config.IFLOW_OAUTH_JWKS_URL;
-  const audience = oauthInput.audience ?? config.IFLOW_MCP_AUDIENCE;
+  const issuer = input.issuer ?? config.IFLOW_OAUTH_ISSUER;
+  const jwksUrl = input.jwksUrl ?? config.IFLOW_OAUTH_JWKS_URL;
+  const audience = input.audience ?? config.IFLOW_MCP_AUDIENCE;
+  const transport = input.mcpTransport ?? config.IFLOW_MCP_TRANSPORT;
 
-  const checks: ReadinessChecks = { config: "ok" };
+  const checks: ReadinessChecks = { config: "ok", transport };
 
   const hasIssuer = Boolean(issuer);
   const hasJwks = Boolean(jwksUrl);
@@ -28,6 +34,10 @@ export async function runReadinessChecks(
 
   if (!hasIssuer && !hasJwks && !hasAud) {
     checks.oauth = "not_configured";
+    if (transport === "http") {
+      checks.oauth = "required_for_http_transport";
+      return { ready: false, checks };
+    }
     return { ready: true, checks };
   }
 

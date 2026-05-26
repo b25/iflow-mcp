@@ -12,6 +12,14 @@ describe("runReadinessChecks", () => {
     expect(r.ready).toBe(true);
     expect(r.checks.oauth).toBe("not_configured");
     expect(r.checks.config).toBe("ok");
+    expect(r.checks.transport).toBe("stdio");
+  });
+
+  it("not ready for HTTP transport when OAuth is not configured", async () => {
+    const r = await runReadinessChecks({ mcpTransport: "http" });
+    expect(r.ready).toBe(false);
+    expect(r.checks.oauth).toBe("required_for_http_transport");
+    expect(r.checks.transport).toBe("http");
   });
 
   it("not ready when OAuth partially configured", async () => {
