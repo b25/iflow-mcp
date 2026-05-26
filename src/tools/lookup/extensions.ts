@@ -43,11 +43,6 @@ export const orderDelayDiagnosisTool = simpleGetTool(
   "Order delay diagnosis / drill-down (dedicated Api Point)."
 );
 
-export const hoursWorkedPerEmployeeTool = simpleGetTool(
-  "hours_worked_per_employee",
-  "Hours worked per employee (widget data)."
-);
-
 export const dailyActivitySummaryTool = simpleGetTool(
   "daily_activity_summary",
   "Recent activity summary."

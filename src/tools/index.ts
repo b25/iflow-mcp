@@ -26,10 +26,17 @@ import {
   procurementTodayTool,
   ordersByStageTool,
   orderDelayDiagnosisTool,
-  hoursWorkedPerEmployeeTool,
   dailyActivitySummaryTool,
   cashflowSummaryTool,
 } from "./lookup/extensions.js";
+import {
+  hoursWorkedPerEmployeeTool,
+  listFlowStagesTool,
+  listUserDepartmentsTool,
+  listWorkFlowsTool,
+  orderProcessingHistoryTool,
+  ordersFlowStageReportTool,
+} from "./lookup/orders-workflow.js";
 import { diffDiagnoseTool } from "./analyst/diagnose.js";
 import {
   analyzeExecutionLoss,
@@ -66,6 +73,11 @@ export function registerAllTools() {
   registry.register(procurementTodayTool);
   registry.register(ordersByStageTool);
   registry.register(orderDelayDiagnosisTool);
+  registry.register(listWorkFlowsTool);
+  registry.register(listFlowStagesTool);
+  registry.register(listUserDepartmentsTool);
+  registry.register(ordersFlowStageReportTool);
+  registry.register(orderProcessingHistoryTool);
   registry.register(hoursWorkedPerEmployeeTool);
   registry.register(dailyActivitySummaryTool);
   registry.register(cashflowSummaryTool);

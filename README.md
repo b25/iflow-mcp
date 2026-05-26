@@ -50,6 +50,41 @@ The server uses environment variables for configuration.
 
 ### 5. Client integration
 
+**Where to configure:** secrets and URLs go in **`.env`** (see [`.env.example`](.env.example)). Each MCP client uses a **`mcpServers`** block: `command` + `args` pointing at `dist/index.js`, plus the same variables under `env`. Tool → UUID mapping is **`IFLOW_API_POINTS`** JSON aligned with Django **Api Points** — template [`examples/iflow-api-points.sample.json`](examples/iflow-api-points.sample.json). Snippet index: [`examples/README.md`](examples/README.md).
+
+**Prompt for Cursor / Claude / ChatGPT:** copy the block below (same idea as the JSON snippets — one fenced block to grab). Extended notes and the *where to save* table: **[`examples/configure-iflow-mcp-prompt.md`](examples/configure-iflow-mcp-prompt.md)**.
+
+#### Assistant prompt (copy-paste)
+
+```text
+Ești un asistent care mă ajută să conectez serverul MCP **iflow-mcp** (iFlow ERP) la editorul meu sau la Claude Desktop.
+
+Context tehnic:
+- iflow-mcp este un server Node (>=20); binarul rulează cu `node <cale>/dist/index.js` sau comanda `iflow-mcp` după `npm run build`.
+- Variabilele obligatorii sunt documentate în `iflow-mcp/.env.example`.
+- Maparea tool → UUID în Django: fie **Api Points** de tip IFLOW_MCP cu cheia logică egală cu cheia din JSON, fie câmpul `IFLOW_API_POINTS` (JSON) care mapează fiecare cheie la `path_uuid`-ul din Api Point. Șablon: `iflow-mcp/examples/iflow-api-points.sample.json`.
+
+Moduri:
+1) **Clasic api-external**: `IFLOW_API_BEARER` + `IFLOW_API_POINTS` cu UUID-uri `/api-external/v1/<uuid>/`.
+2) **Broker Django** (pagina MCP din iFlow): setez `IFLOW_MCP_INTEGRATION_UUID` + Bearer-ul din „Generează token”; pot folosi `IFLOW_API_POINTS` gol `{}`. Vezi `examples/cursor.broker.mcp.json`.
+
+Fișiere de referință în repo-ul iflow-mcp:
+- `examples/cursor.mcp.json` — Cursor (`mcpServers`)
+- `examples/cursor.local-http.mcp.json` — Cursor + Django local HTTP
+- `examples/claude-desktop-config.json` — Claude Desktop
+- `examples/claude-code.mcp.json` — Claude Code (`.mcp.json` proiect)
+- `examples/chatgpt-desktop-config.json` — ChatGPT Desktop
+- `examples/gemini-cursor-config.json` — Gemini (același tip `mcpServers`)
+- `examples/openai-codex-config.toml` — Codex CLI
+
+Cerințe:
+1. Întreabă-mă: calea absolută către `iflow-mcp/dist/index.js`, `IFLOW_BASE_URL` (doar hostul pentru `IFLOW_ALLOWED_HOSTS`), dacă folosesc mod broker sau api-external, și dacă vreau `IFLOW_READ_ONLY=1`.
+2. Generează **un singur** snippet JSON valid pentru clientul pe care îl aleg eu (Cursor sau Claude Desktop), cu `"command": "node"`, `"args": ["/cale/absolută/dist/index.js"]`, și `"env": { ... }`. Nu pune secrete în clar dacă pot folosi `${env:NUME_VAR}` (Cursor).
+3. Reamintește: după modificarea Api Points în Django, actualizez `IFLOW_API_POINTS` și rulez `npm run build` în iflow-mcp dacă am schimbat codul serverului.
+
+Răspunde concis, în română sau engleză după preferința mea.
+```
+
 #### Claude Desktop
 Add to your `claude_desktop_config.json`:
 ```json
@@ -81,7 +116,7 @@ Lookup / operations (each needs a matching UUID in `IFLOW_API_POINTS` — see `e
 - Finance: `vat_estimate`, `supplier_payments_due`, `top_products_by_margin`
 - Partners / AR: `list_partners`, `list_overdue_customers`
 - Offers: `latest_offer_for_client`
-- Ops: `lost_offers_breakdown`, `top_agents`, `procurement_today`, `orders_by_stage`, `order_delay_diagnosis`, `hours_worked_per_employee`, `daily_activity_summary`, `cashflow_summary`
+- Ops: `lost_offers_breakdown`, `top_agents`, `procurement_today`, `orders_by_stage`, `order_delay_diagnosis`, `list_work_flows`, `list_flow_stages`, `list_user_departments`, `orders_flow_stage_report`, `order_processing_history`, `hours_worked_per_employee`, `daily_activity_summary`, `cashflow_summary`
 - Analyst (requires backend endpoints): `analyze_*`, `where_are_we_losing_money`, `diff_diagnose` — **statistical hygiene** (samples with n under 10 down-ranked, narrative max 5 findings; default Romanian text, optional input `language: en`); see [`.plans/product-scenarios.md`](.plans/product-scenarios.md) section D5.
 - `health` — configured keys + read-only flag (no secrets)
 - `iflow_playbook_index` — lists scenario tools (`product_scenarios_phase0`, `scenariul_1`, `scenariul_2`, `health`) and `.plans/` doc paths (no network)
