@@ -17,6 +17,19 @@ export function requiredScopesForTool(toolName: string): string[] | null {
     return ["tools:orders:write"];
   }
   if (
+    toolName === "update_order_status" ||
+    toolName === "mark_order_finished" ||
+    toolName === "mark_order_billed"
+  ) {
+    return ["tools:orders:write"];
+  }
+  if (toolName === "add_client_note") {
+    return ["tools:clients:write"];
+  }
+  if (toolName === "add_offer_comment") {
+    return ["tools:offers:write"];
+  }
+  if (
     toolName === "where_are_we_losing_money" ||
     toolName === "diff_diagnose" ||
     toolName.startsWith("analyze_")

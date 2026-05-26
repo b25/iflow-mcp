@@ -1,0 +1,47 @@
+---
+description: >-
+  Forțează folosirea agresivă a MCP iflow (iflow-broker) la întrebări despre
+  business, date, comenzi, clienți, oferte, stoc, facturi, rapoarte — înainte
+  de răspuns din memorie sau presupuneri.
+alwaysApply: true
+---
+
+# iFlow MCP — prioritate maximă în chat
+
+## Când se aplică (declanșatori)
+
+De îndată ce utilizatorul pune **orice întrebare** despre: comenzi, oferte, clienți, furnizori, produse, stoc, facturi, TVA, cashflow, rapoarte, KPI, „câte / cine / ce / ultimele / arată-mi / de ce / compară / trend”, date din iFlow / PromoArt / ERP — **nu răspunde din memorie cu cifre sau liste**. Tratează MCP ca sursa de adevăr.
+
+## Comportament obligatoriu (în ordine)
+
+1. **Început de conversație sau „ce poți face / cum mă ajuți”**  
+   Apelează tool-ul **`mcp_assistant_intro`** (opțional `topic`, `language`) înainte de orice explicație lungă.
+
+2. **Obiectiv vag sau lipsesc filtre (perioadă, client, limită)**  
+   Apelează **`mcp_clarify`** cu `objective` = textul utilizatorului (și `language` dacă e relevant). Pune utilizatorului **întrebările returnate** (id, prompt, opțiuni) în chat, apoi continuă.
+
+3. **Înainte de filtre complexe pe entități**  
+   Dacă nu ești sigur ce câmpuri există, apelează **`mcp_data_dictionary`** (`entity` = orders | offers | clients | products | invoices | purchases | activity).
+
+4. **După clarificări**  
+   Apelează **`mcp_plan`** cu același `objective` + `answers` (dict JSON cu id-urile întrebărilor din `mcp_clarify`). Execută pașii `steps[]` în ordine (`tool`, `args`, `why`).
+
+5. **Rutare rapidă**  
+   Poți folosi în paralel **`mcp_query_assist`** sau **`mcp_tool_catalog`** dacă nu știi ce tool cheamă.
+
+6. **Scrieri în DB** (`update_order_status`, `mark_order_*`, `add_*`)  
+   Doar dacă utilizatorul cere explicit; respectă `IFLOW_READ_ONLY` și confirmările din broker.
+
+## Ce nu ai voie să faci
+
+- Inventa numere, liste de înregistrări sau stări fără un apel MCP reușit.
+- Sări peste `mcp_clarify` când întrebarea e ambiguă doar ca să pari rapid.
+- Înlocui date live cu „în mod tipic” fără a spune că e generalizare și fără tool.
+
+## Server MCP
+
+În acest workspace, serverul este **`iflow-broker`** (vezi `.cursor/mcp.json`). Toate tool-urile iFlow merg prin el; dacă MCP nu e disponibil, spune clar că nu poți confirma datele și cere verificare manuală sau repornire MCP.
+
+## Ton
+
+După ce apelezi tool-urile, explică în română (sau limba utilizatorului) ce înseamnă rezultatele pentru business, legându-le de întrebarea concretă.

@@ -41,6 +41,45 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "analyze_correction_costs",
   "diff_diagnose_metric",
   "diff_diagnose_events",
+  // Phase 1.2 list/search endpoints
+  "list_orders",
+  "list_offers",
+  "list_invoices",
+  "list_suppliers",
+  "list_products_search",
+  "list_clients_search",
+  "list_purchases",
+  "list_stock_movements",
+  "list_activity",
+  "list_notes",
+  "list_comments",
+  // Phase 1.3 meta / discovery
+  "mcp_tool_catalog",
+  "mcp_query_assist",
+  // Phase 4 virtual-assistant flow
+  "mcp_assistant_intro",
+  "mcp_data_dictionary",
+  "mcp_clarify",
+  "mcp_plan",
+  // Phase 2 reports (registered by ./reports/index.ts)
+  "report_sales",
+  "report_profit",
+  "report_total_sales",
+  "report_quantity",
+  "report_employee",
+  "report_equipments_gantt",
+  "report_stock_purchases",
+  "report_dashboard_card",
+  "accounting_partner_balance",
+  "accounting_invoices_issued",
+  "accounting_stock_balance",
+  "accounting_intrastat",
+  // Phase 3.3 writes (registered by ./writes/index.ts)
+  "update_order_status",
+  "mark_order_finished",
+  "mark_order_billed",
+  "add_client_note",
+  "add_offer_comment",
 ] as const;
 
 export type RequiredApiPointKey = (typeof REQUIRED_IFLOW_API_POINT_KEYS)[number];

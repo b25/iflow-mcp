@@ -52,6 +52,8 @@ The server uses environment variables for configuration.
 
 **Where to configure:** secrets and URLs go in **`.env`** (see [`.env.example`](.env.example)). Each MCP client uses a **`mcpServers`** block: `command` + `args` pointing at `dist/index.js`, plus the same variables under `env`. Tool → UUID mapping is **`IFLOW_API_POINTS`** JSON aligned with Django **Api Points** — template [`examples/iflow-api-points.sample.json`](examples/iflow-api-points.sample.json). Snippet index: [`examples/README.md`](examples/README.md).
 
+**Cursor — MCP favorizat în fiecare chat:** copiază **`iflow-mcp/examples/cursor-rules/iflow-mcp-aggressive-priority.mdc`** în **`.cursor/rules/`** la rădăcina workspace-ului Cursor (păstrează `alwaysApply: true`). Regula spune agentului să apeleze mai întâi tool-urile MCP (flux `mcp_assistant_intro` → `mcp_clarify` → `mcp_plan` / `mcp_data_dictionary` + restul) la întrebări despre business sau date iFlow, fără cifre inventate. Dacă monorepo-ul tău are deja fișierul la rădăcină (ex. `ionut/.cursor/rules/`), același conținut se aplică.
+
 **Prompt for Cursor / Claude / ChatGPT:** copy the block below (same idea as the JSON snippets — one fenced block to grab). Extended notes and the *where to save* table: **[`examples/configure-iflow-mcp-prompt.md`](examples/configure-iflow-mcp-prompt.md)**.
 
 #### Assistant prompt (copy-paste)
@@ -77,10 +79,26 @@ Fișiere de referință în repo-ul iflow-mcp:
 - `examples/gemini-cursor-config.json` — Gemini (același tip `mcpServers`)
 - `examples/openai-codex-config.toml` — Codex CLI
 
-Cerințe:
+Cerințe (configurare):
 1. Întreabă-mă: calea absolută către `iflow-mcp/dist/index.js`, `IFLOW_BASE_URL` (doar hostul pentru `IFLOW_ALLOWED_HOSTS`), dacă folosesc mod broker sau api-external, și dacă vreau `IFLOW_READ_ONLY=1`.
 2. Generează **un singur** snippet JSON valid pentru clientul pe care îl aleg eu (Cursor sau Claude Desktop), cu `"command": "node"`, `"args": ["/cale/absolută/dist/index.js"]`, și `"env": { ... }`. Nu pune secrete în clar dacă pot folosi `${env:NUME_VAR}` (Cursor).
 3. Reamintește: după modificarea Api Points în Django, actualizez `IFLOW_API_POINTS` și rulez `npm run build` în iflow-mcp dacă am schimbat codul serverului.
+
+După ce MCP este conectat — **comportament obligatoriu** (aplică și în Cursor, Claude Desktop, ChatGPT, Claude Code, oriunde ai MCP iflow activ):
+
+4. **Sursa de adevăr = tool-urile MCP**: la orice întrebare despre date iFlow / PromoArt (comenzi, oferte, clienți, furnizori, produse, stoc, facturi, TVA, cashflow, rapoarte, KPI, activitate, „câte / cine / ce / ultimele / arată-mi / de ce / compară / trend”), **nu inventa cifre, liste sau stări**. Apelează MCP până obții JSON real sau explici clar că apelul a eșuat.
+
+5. **Flux virtual assistant (ordine recomandată)**:
+   - Început de conversație sau „ce poți face / cum mă ajuți”: **`mcp_assistant_intro`** (opțional `topic`, `language`).
+   - Obiectiv vag sau lipsesc filtre: **`mcp_clarify`** cu `objective` = textul utilizatorului; afișează în chat **întrebările structurate** returnate (id, prompt, opțiuni); apoi **`mcp_plan`** cu același `objective` + `answers` (dict JSON cu răspunsurile); execută **în ordine** pașii din `steps` (`tool`, `args`, `why`).
+   - Nu știi ce câmpuri / filtre există: **`mcp_data_dictionary`** (`entity`: orders, offers, clients, products, invoices, purchases, activity).
+   - Nu știi ce tool: **`mcp_query_assist`** sau **`mcp_tool_catalog`**.
+
+6. **Cursor — regulă de proiect**: dacă workspace-ul are fișierul **`.cursor/rules/iflow-mcp-aggressive-priority.mdc`** cu `alwaysApply: true`, tratează-l ca **obligatoriu** împreună cu punctele 4–5. Dacă lipsește, spune utilizatorului să copieze **`iflow-mcp/examples/cursor-rules/iflow-mcp-aggressive-priority.mdc`** în `.cursor/rules/` la rădăcina folderului deschis în Cursor.
+
+7. **Scrieri în baza de date** (`update_order_status`, `mark_order_*`, `add_client_note`, `add_offer_comment`): doar dacă utilizatorul cere explicit; respectă `IFLOW_READ_ONLY` și confirmările din broker.
+
+EN (same rules for English sessions): Once MCP is connected, never fabricate iFlow business numbers—always call MCP first. Use `mcp_assistant_intro` → `mcp_clarify` → `mcp_plan` → execute `steps`; use `mcp_data_dictionary` for schema help; `mcp_query_assist` / `mcp_tool_catalog` for routing. Honor `.cursor/rules/iflow-mcp-aggressive-priority.mdc` when present.
 
 Răspunde concis, în română sau engleză după preferința mea.
 ```
@@ -118,6 +136,15 @@ Lookup / operations (each needs a matching UUID in `IFLOW_API_POINTS` — see `e
 - Offers: `latest_offer_for_client`
 - Ops: `lost_offers_breakdown`, `top_agents`, `procurement_today`, `orders_by_stage`, `order_delay_diagnosis`, `list_work_flows`, `list_flow_stages`, `list_user_departments`, `orders_flow_stage_report`, `order_processing_history`, `hours_worked_per_employee`, `daily_activity_summary`, `cashflow_summary`
 - Analyst (requires backend endpoints): `analyze_*`, `where_are_we_losing_money`, `diff_diagnose` — **statistical hygiene** (samples with n under 10 down-ranked, narrative max 5 findings; default Romanian text, optional input `language: en`); see [`.plans/product-scenarios.md`](.plans/product-scenarios.md) section D5.
+- **Virtual assistant flow (Phase 4):** four meta tools that turn the MCP into a guided assistant. Recommended order when starting a new chat:
+  1. `mcp_assistant_intro` — business overview + topics + top user questions. Call this first when the user asks "what can you do?" or starts vague.
+  2. `mcp_data_dictionary` — entity/field/enum descriptions per topic; use it to discover what filters exist before constructing a query.
+  3. `mcp_clarify` — pass the raw user objective; returns structured clarifying questions `{id, prompt, type, options, default}` grouped by topic plus candidate tools.
+  4. `mcp_plan` — pass `objective` + `answers` (dict keyed by clarification id); returns an executable ordered plan of `{tool, args, why}` steps that the agent runs in sequence.
+- **Parameterized listings (Phase 1.2):** `list_orders`, `list_offers`, `list_invoices`, `list_suppliers`, `list_products_search`, `list_clients_search`, `list_purchases`, `list_stock_movements`, `list_activity`, `list_notes`, `list_comments` — all accept `from/to`, entity filters, `q`, `limit`, `offset` and return `{results, count, next_offset, filters}`. Example: *"show last 20 unfinished orders"* → `list_orders({finished:false, limit:20, order_by:"date_order_desc"})`.
+- **Discovery (Phase 1.3):** `mcp_tool_catalog` (filter by `category`/`q`) and `mcp_query_assist` (natural-language objective → recommended tools + suggested args).
+- **Reports (Phase 2):** `report_sales`, `report_profit`, `report_total_sales`, `report_quantity`, `report_employee`, `report_equipments_gantt`, `report_stock_purchases`, `report_dashboard_card`, `accounting_partner_balance`, `accounting_invoices_issued`, `accounting_stock_balance`, `accounting_intrastat` — backed by reusable aggregations in `services/reports_query.py` (shared with Django UI).
+- **Writes (Phase 3.3, `requires_confirmation=true`, disabled when `IFLOW_READ_ONLY=1`):** `update_order_status`, `mark_order_finished`, `mark_order_billed`, `add_client_note`, `add_offer_comment` — all log a `ReportsRecentActivity` audit row. Pass `confirm: true` to send the `X-MCP-Confirm-Token` header.
 - `health` — configured keys + read-only flag (no secrets)
 - `iflow_playbook_index` — lists scenario tools (`product_scenarios_phase0`, `scenariul_1`, `scenariul_2`, `health`) and `.plans/` doc paths (no network)
 - `product_scenarios_phase0` — maps the [35 Phase 0 questions](.plans/product-scenarios.md) (section B1) to registered MCP tools (no network; for coverage tracking)

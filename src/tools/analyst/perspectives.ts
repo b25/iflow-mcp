@@ -20,6 +20,7 @@ function createPerspectiveTool(
       const query: Record<string, string> = {};
       if (from) query.from = from;
       if (to) query.to = to;
+      if (language) query.language = language;
       const data = await iflowClient.fetch<Partial<AnalystResult>>(apiPointKey, "GET", undefined, {
         query: Object.keys(query).length ? query : undefined,
       });
