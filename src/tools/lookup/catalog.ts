@@ -5,11 +5,11 @@ import { iflowClient } from "../../iflow/client.js";
 export const mcpToolCatalogTool: Tool = {
   name: "mcp_tool_catalog",
   description:
-    "Return the broker-side catalog of MCP tools (key, label, category, parameters, requires_confirmation). Filter by category (lookup/list/report/analyst/meta/write) or text query.",
-  inputSchema: z.object({
-    category: z
-      .enum(["lookup", "list", "report", "analyst", "meta", "write", "other"])
-      .optional(),
+    "Return the broker-side catalog of MCP tools (key, label, category, parameters, requires_confirmation). Filter by category (lookup/list/report/analyst/meta/write/assistant/other) or text query.",
+    inputSchema: z.object({
+      category: z
+        .enum(["lookup", "list", "report", "analyst", "meta", "write", "assistant", "other"])
+        .optional(),
     q: z.string().optional(),
   }),
   execute: async (args): Promise<MCPToolResult> => {

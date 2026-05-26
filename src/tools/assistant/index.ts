@@ -11,6 +11,7 @@ const TOPICS = [
   "products",
   "finance",
   "workflow",
+  "diagnose",
 ] as const;
 
 const ENTITIES = [
@@ -36,7 +37,7 @@ function asQuery(args: Record<string, unknown>): Record<string, string | number 
 export const mcpAssistantIntroTool: Tool = {
   name: "mcp_assistant_intro",
   description:
-    "Start here. Returns an iFlow business overview, the main topics (orders/offers/clients/products/finance/workflow), top user questions and the assistant flow (intro -> dictionary -> clarify -> plan). Call this first when the user asks 'what can you do?' or starts a new conversation.",
+    "Start here. Returns an iFlow business overview, the main topics (orders/offers/clients/products/finance/workflow/diagnose), top user questions and the assistant flow (intro -> dictionary -> clarify -> plan). Call this first when the user asks 'what can you do?' or starts a new conversation.",
   inputSchema: z.object({
     topic: z.enum(TOPICS).optional(),
     language,

@@ -22,6 +22,7 @@ describe("phase 4 assistant tools — inputSchema", () => {
     const tool = registry.getTool("mcp_assistant_intro")!;
     expect(tool.inputSchema.safeParse({}).success).toBe(true);
     expect(tool.inputSchema.safeParse({ topic: "orders" }).success).toBe(true);
+    expect(tool.inputSchema.safeParse({ topic: "diagnose" }).success).toBe(true);
     expect(tool.inputSchema.safeParse({ topic: "bogus" }).success).toBe(false);
   });
 
