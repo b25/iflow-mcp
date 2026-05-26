@@ -36,6 +36,8 @@ Set `IFLOW_MCP_TRANSPORT=http` to serve MCP over SSE instead of stdio (default p
 Copy `.env.example` to `.env` and fill in your credentials.
 The server uses environment variables for configuration.
 
+**Django MCP broker (token from `/integrations/mcp/settings/`):** set `IFLOW_MCP_INTEGRATION_UUID` to the CompanyIntegrations `integration_uuid` (shown on that page). Use the opaque Bearer from **Generează token** as `IFLOW_API_BEARER`. HTTP calls then go to `GET|POST {IFLOW_BASE_URL}/v1/<uuid>/<logical_endpoint>/` instead of `/api-external/v1/<uuid>/`. You can set `IFLOW_API_POINTS` to `{}` in broker mode. Cursor sample: [`examples/cursor.broker.mcp.json`](examples/cursor.broker.mcp.json).
+
 ### 4. Tool schemas
 
 `tools/list` exposes **JSON Schema** for each tool’s inputs (from Zod via `zod-to-json-schema`), so clients can validate arguments before calling iflow.
@@ -96,7 +98,7 @@ For tools that are not plain **Clients / Products / Orders** list endpoints, the
 - **Analyst narrative language** — `analyze_*`, `diff_diagnose`, and `where_are_we_losing_money` accept optional tool input `language`: `ro` (default) or `en`.
 - **Request correlation (HTTP)** — tool completion logs include `requestId` when running inside the remote transport (matches response `X-Request-Id`).
 - **HTTPS** for `IFLOW_BASE_URL` by default; **`IFLOW_ALLOW_INSECURE_HTTP=1`** opts into `http://` for local dev only
-- **PromoArt two-phase confirmation** — if api-external returns **`403`** with **`code: confirmation_required`**, complete the same logical Api Point with **`iflow-mcp confirm --key <IFLOW_API_POINTS key> --token <confirm_token>`** (sends `X-MCP-Confirm-Token`). MCP tools map that error to a short user message (no token echoed). Error logs redact `details.confirm_token` / `pending_id`.
+- **PromoArt two-phase confirmation** — if api-external returns **`403`** with **`code: confirmation_required`**, complete the same logical Api Point with **`iflow-mcp confirm --key <IFLOW_API_POINTS key> [--token <confirm_token>]`** (sends `X-MCP-Confirm-Token`). Token也可 provided via **`IFLOW_CONFIRM_TOKEN`** environment variable to avoid CLI argument exposure. MCP tools map that error to a short user message (no token echoed). Error logs redact `details.confirm_token` / `pending_id`.
 - **Host allowlist** (`IFLOW_ALLOWED_HOSTS`) and `redirect: manual` on the HTTP client
 - **Log redaction** for `Authorization` headers (pino)
 - **Read-only mode** via `IFLOW_READ_ONLY=1` (disables `create_order`)

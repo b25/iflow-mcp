@@ -31,7 +31,7 @@ export function mapIFlowError(error: unknown): McpError {
         case "confirmation_required":
           return new McpError(
             ErrorCode.InvalidRequest,
-            `${error.body.message} Two-phase confirmation: run \`iflow-mcp confirm --key <IFLOW_API_POINTS key> --token <confirm_token>\` (same key as the tool call). Do not log or commit the token.`
+            `${error.body.message} Two-phase confirmation: run \`iflow-mcp confirm --key <IFLOW_API_POINTS key> [--token <confirm_token>] or set IFLOW_CONFIRM_TOKEN\` (same key as the tool call).`
           );
         case "invalid_mcp_confirm_token":
         case "mcp_endpoint_disabled":

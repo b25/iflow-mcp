@@ -85,5 +85,7 @@ export function registerAllTools() {
   registry.register(analyzeCorrectionCosts);
   registry.register(whereAreWeLosingMoneyTool);
 
-  assertAllApiPointsConfigured(config.IFLOW_API_POINTS);
+  if (!config.IFLOW_MCP_INTEGRATION_UUID) {
+    assertAllApiPointsConfigured(config.IFLOW_API_POINTS);
+  }
 }

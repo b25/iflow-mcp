@@ -83,8 +83,12 @@ export class IFlowClient {
     body?: unknown,
     options?: IFlowFetchOptions
   ): Promise<T> {
-    const pathUuid = resolveApiPoint(apiPointKey, this.cfg.IFLOW_API_POINTS);
-    const url = new URL(`${this.baseUrl}/api-external/v1/${pathUuid}/`);
+    const brokerUuid = this.cfg.IFLOW_MCP_INTEGRATION_UUID;
+    const url = brokerUuid
+      ? new URL(`${this.baseUrl}/v1/${brokerUuid}/${apiPointKey}/`)
+      : new URL(
+          `${this.baseUrl}/api-external/v1/${resolveApiPoint(apiPointKey, this.cfg.IFLOW_API_POINTS)}/`
+        );
     if (options?.query) {
       for (const [k, v] of Object.entries(options.query)) {
         if (v !== undefined) url.searchParams.set(k, String(v));

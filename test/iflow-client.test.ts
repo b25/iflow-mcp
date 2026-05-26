@@ -22,6 +22,7 @@ const testCfg: AppConfig = {
   IFLOW_BFF_SHARED_SECRET: undefined,
   IFLOW_DPOP_REPLAY_CACHE: "memory",
   IFLOW_HTTP_BIND_HOST: "127.0.0.1",
+  IFLOW_MCP_INTEGRATION_UUID: undefined,
 };
 
 describe("IFlowClient", () => {
@@ -107,6 +108,29 @@ describe("IFlowClient", () => {
           "X-MCP-Confirm-Token": "ct-secret",
         }),
       })
+    );
+  });
+
+  it("uses Django broker URL when IFLOW_MCP_INTEGRATION_UUID is set", async () => {
+    const integ = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const client = new IFlowClient({
+      ...testCfg,
+      IFLOW_MCP_INTEGRATION_UUID: integ,
+      IFLOW_API_POINTS: {},
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ results: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      )
+    );
+    await client.fetch("list_partners", "GET");
+    expect(fetch).toHaveBeenCalledWith(
+      `https://ok.example.com/v1/${integ}/list_partners/`,
+      expect.any(Object)
     );
   });
 });

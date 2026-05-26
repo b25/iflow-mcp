@@ -6,6 +6,12 @@ export function applyTransportDefaults(env: NodeJS.ProcessEnv): NodeJS.ProcessEn
   if (out.IFLOW_MCP_TRANSPORT === "http" && out.IFLOW_READ_ONLY === undefined) {
     out.IFLOW_READ_ONLY = "1";
   }
+  // Django broker (`GET /v1/<integration_uuid>/<endpoint>/`) does not use IFLOW_API_POINTS; allow empty map.
+  const uuidRaw = (out.IFLOW_MCP_INTEGRATION_UUID ?? "").trim();
+  const pointsRaw = (out.IFLOW_API_POINTS ?? "").trim();
+  if (uuidRaw && !pointsRaw) {
+    out.IFLOW_API_POINTS = "{}";
+  }
   return out;
 }
 
@@ -65,6 +71,20 @@ const configSchema = z
     IFLOW_DPOP_REPLAY_CACHE: z.enum(["redis", "memory"]).optional().default("memory"),
     /** Listen address for IFLOW_MCP_TRANSPORT=http. Use 0.0.0.0 in Docker; default 127.0.0.1 for local safety. */
     IFLOW_HTTP_BIND_HOST: z.string().min(1).optional().default("127.0.0.1"),
+    /**
+     * When set, HTTP calls use the Django MCP broker:
+     * `{IFLOW_BASE_URL}/v1/<uuid>/<logical_endpoint>/` with `IFLOW_API_BEARER`
+     * (opaque token from `/integrations/mcp/settings/`). Omit for legacy
+     * `/api-external/v1/<IFLOW_API_POINTS[key]>/`.
+     */
+    IFLOW_MCP_INTEGRATION_UUID: z.preprocess(
+      (v) => {
+        if (v === undefined || v === null) return undefined;
+        const s = String(v).trim();
+        return s.length ? s : undefined;
+      },
+      z.string().uuid().optional()
+    ),
   })
   .refine(
     (data) => data.IFLOW_ALLOW_INSECURE_HTTP || data.IFLOW_BASE_URL.startsWith("https://"),

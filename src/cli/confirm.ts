@@ -5,9 +5,23 @@
 import { applyTransportDefaults, parseEnv } from "../iflow/parse-env.js";
 import { resolveApiPoint } from "../iflow/resolve.js";
 
+/** @returns UUID v4 regex pattern */
+function isValidTokenFormat(token: string): boolean {
+  // PromoArt tokens are typically UUIDs or similar hex strings
+  const uuidv4Pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidv4Pattern.test(token) || token.length >= 16;
+}
+
 export function parseConfirmArgs(argv: string[]): { key: string; token: string } {
   let key = "";
   let token = "";
+
+  // Check environment variable first for token (security: avoid CLI argument exposure)
+  const envToken = process.env.IFLOW_CONFIRM_TOKEN?.trim();
+  if (envToken) {
+    token = envToken;
+  }
+
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--key" && argv[i + 1]) {
@@ -19,9 +33,19 @@ export function parseConfirmArgs(argv: string[]): { key: string; token: string }
       continue;
     }
   }
-  if (!key.trim() || !token.trim()) {
+  if (!key.trim()) {
     throw new Error(
-      "Usage: iflow-mcp confirm --key <IFLOW_API_POINTS logical key> --token <confirm_token>"
+      "Usage: iflow-mcp confirm --key <IFLOW_API_POINTS logical key> [--token <confirm_token>] or set IFLOW_CONFIRM_TOKEN"
+    );
+  }
+  if (!token.trim()) {
+    throw new Error(
+      "Token required: use --token <confirm_token> or set IFLOW_CONFIRM_TOKEN environment variable"
+    );
+  }
+  if (!isValidTokenFormat(token)) {
+    throw new Error(
+      "Invalid token format: expected UUID v4 or hex string (min 16 chars)"
     );
   }
   return { key: key.trim(), token: token.trim() };
