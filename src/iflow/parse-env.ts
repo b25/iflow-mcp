@@ -1,11 +1,17 @@
 import { z } from "zod";
 
-/** Phase B: remote HTTP defaults to read-only unless IFLOW_READ_ONLY is set explicitly. */
 export function applyTransportDefaults(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const out: NodeJS.ProcessEnv = { ...env };
   if (out.IFLOW_MCP_TRANSPORT === "http" && out.IFLOW_READ_ONLY === undefined) {
     out.IFLOW_READ_ONLY = "1";
   }
+
+  // Map IFLOW_MCP_TOOL_UUIDS to IFLOW_API_POINTS for alias fallback support
+  const toolUuids = out.IFLOW_MCP_TOOL_UUIDS ?? out.IFLOW_API_POINTS;
+  if (toolUuids !== undefined) {
+    out.IFLOW_API_POINTS = toolUuids;
+  }
+
   // Django broker (`GET /v1/<integration_uuid>/<endpoint>/`) does not use IFLOW_API_POINTS; allow empty map.
   const uuidRaw = (out.IFLOW_MCP_INTEGRATION_UUID ?? "").trim();
   const pointsRaw = (out.IFLOW_API_POINTS ?? "").trim();
@@ -38,6 +44,7 @@ const configSchema = z
       .string()
       .min(1)
       .transform((s) => JSON.parse(s) as Record<string, string>),
+    IFLOW_ENDPOINT_PATH_PREFIX: z.string().min(1).optional().default("/api-external/v1/"),
     IFLOW_READ_ONLY: z
       .enum(["0", "1"])
       .optional()
@@ -55,10 +62,7 @@ const configSchema = z
       .string()
       .optional()
       .transform((s) => parseInt(s || "5", 10)),
-    IFLOW_MCP_TRANSPORT: z
-      .enum(["stdio", "http"])
-      .optional()
-      .default("stdio"),
+    IFLOW_MCP_TRANSPORT: z.enum(["stdio", "http"]).optional().default("stdio"),
     IFLOW_OAUTH_ISSUER: z.string().url().optional(),
     IFLOW_OAUTH_JWKS_URL: z.string().url().optional(),
     IFLOW_MCP_AUDIENCE: z.string().url().optional(),
@@ -77,17 +81,15 @@ const configSchema = z
      * (opaque token from `/integrations/mcp/settings/`). Omit for legacy
      * `/api-external/v1/<IFLOW_API_POINTS[key]>/`.
      */
-    IFLOW_MCP_INTEGRATION_UUID: z.preprocess(
-      (v) => {
-        if (v === undefined || v === null) return undefined;
-        const s = String(v).trim();
-        return s.length ? s : undefined;
-      },
-      z.string().uuid().optional()
-    ),
+    IFLOW_MCP_INTEGRATION_UUID: z.preprocess((v) => {
+      if (v === undefined || v === null) return undefined;
+      const s = String(v).trim();
+      return s.length ? s : undefined;
+    }, z.string().uuid().optional()),
   })
   .refine(
-    (data) => data.IFLOW_ALLOW_INSECURE_HTTP || data.IFLOW_BASE_URL.startsWith("https://"),
+    (data) =>
+      data.IFLOW_ALLOW_INSECURE_HTTP || data.IFLOW_BASE_URL.startsWith("https://"),
     {
       message:
         "IFLOW_BASE_URL must use https:// (set IFLOW_ALLOW_INSECURE_HTTP=1 only for trusted local dev)",

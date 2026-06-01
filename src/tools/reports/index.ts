@@ -6,7 +6,9 @@ const isoDate = z.string().min(8);
 const isoDateTime = z.string().min(8);
 const tagIds = z.union([z.array(z.number().int().positive()), z.string()]).optional();
 
-function flatten(args: Record<string, unknown>): Record<string, string | number | boolean> {
+function flatten(
+  args: Record<string, unknown>
+): Record<string, string | number | boolean> {
   const out: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(args)) {
     if (v === undefined || v === null) continue;
@@ -81,9 +83,7 @@ export const reportTotalSalesTool: Tool = {
   inputSchema: z.object({
     from: isoDateTime.optional(),
     to: isoDateTime.optional(),
-    client_id: z
-      .union([z.array(z.number().int().positive()), z.string()])
-      .optional(),
+    client_id: z.union([z.array(z.number().int().positive()), z.string()]).optional(),
     flow_id: z.number().int().positive().optional(),
     client_status: z.enum(["active", "inactive", "new"]).optional(),
     district: z.string().optional(),
@@ -157,8 +157,7 @@ export const reportStockPurchasesTool: Tool = {
     limit: z.number().int().min(1).max(500).optional(),
     offset: z.number().int().min(0).optional(),
   }),
-  execute: (args) =>
-    runReport("report_stock_purchases", args as Record<string, unknown>),
+  execute: (args) => runReport("report_stock_purchases", args as Record<string, unknown>),
 };
 
 export const reportDashboardCardTool: Tool = {
@@ -180,8 +179,7 @@ export const reportDashboardCardTool: Tool = {
     previous_daterange: z.string().optional(),
     employee_id: z.number().int().positive().optional(),
   }),
-  execute: (args) =>
-    runReport("report_dashboard_card", args as Record<string, unknown>),
+  execute: (args) => runReport("report_dashboard_card", args as Record<string, unknown>),
 };
 
 export const accountingPartnerBalanceTool: Tool = {
@@ -232,6 +230,5 @@ export const accountingIntrastatTool: Tool = {
     year: z.number().int().min(2000).max(2100),
     month: z.number().int().min(1).max(12),
   }),
-  execute: (args) =>
-    runReport("accounting_intrastat", args as Record<string, unknown>),
+  execute: (args) => runReport("accounting_intrastat", args as Record<string, unknown>),
 };

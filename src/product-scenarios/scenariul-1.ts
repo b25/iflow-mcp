@@ -62,7 +62,8 @@ export const SCENARIO_1_PERSPECTIVES: Scenario1Perspective[] = [
   {
     num: 3,
     titleRo: "Pierderi financiare directe (cash-flow)",
-    hypothesisRo: "Banii sunt câștigați pe hârtie dar nu intră în cont sau intră prea târziu.",
+    hypothesisRo:
+      "Banii sunt câștigați pe hârtie dar nu intră în cont sau intră prea târziu.",
     modulesRo: [
       "Facturi → sold, status, scadențe, încasări",
       "Facturi Proforme neconvertite",
@@ -169,10 +170,7 @@ export const SCENARIO_1_PERSPECTIVES: Scenario1Perspective[] = [
     titleRo: "Pierderi din erori și corecții",
     hypothesisRo: "Storno și retururi costă direct și indirect.",
     modulesRo: ["Facturi → storno, anulări"],
-    indicatorsRo: [
-      "Frecvență storno per agent / perioadă",
-      "Top produse cu retururi",
-    ],
+    indicatorsRo: ["Frecvență storno per agent / perioadă", "Top produse cu retururi"],
     mcpAnalyzeTool: "analyze_correction_costs",
     backendPrereq: "Agregări facturi / corecții",
   },

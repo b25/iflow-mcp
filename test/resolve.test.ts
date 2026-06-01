@@ -10,6 +10,8 @@ describe("resolveApiPoint", () => {
   });
 
   it("throws for unknown key", () => {
-    expect(() => resolveApiPoint("not_a_real_tool_key")).toThrow(/Missing IFLOW_API_POINTS/);
+    expect(() => resolveApiPoint("not_a_real_tool_key")).toThrow(
+      /Missing IFLOW_API_POINTS/
+    );
   });
 });

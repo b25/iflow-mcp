@@ -10,7 +10,10 @@ describe("scenariul_1", () => {
   });
 
   it("playbook returns 8 perspectives and endpoint notes without calling iflow", async () => {
-    const out = await registry.executeTool("scenariul_1", { action: "playbook", language: "ro" });
+    const out = await registry.executeTool("scenariul_1", {
+      action: "playbook",
+      language: "ro",
+    });
     const sc = out.structuredContent as {
       perspectives: typeof SCENARIO_1_PERSPECTIVES;
       endpoint_design_notes_ro: string[];
@@ -28,5 +31,16 @@ describe("scenariul_1", () => {
       action: "analyze_perspective",
     });
     expect(parsed.success).toBe(false);
+  });
+
+  it("scenario_1 alias behaves identically to scenariul_1", async () => {
+    expect(registry.getTool("scenario_1")).toBeDefined();
+    const out = await registry.executeTool("scenario_1", {
+      action: "playbook",
+      language: "en",
+    });
+    expect(out.content[0].text).toContain("Scenario 1 playbook");
+    const sc = out.structuredContent as any;
+    expect(sc.perspectives).toHaveLength(8);
   });
 });

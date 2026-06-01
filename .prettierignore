@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.plans/
+examples/
+coverage/
+package-lock.json
+*.md

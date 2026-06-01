@@ -7,6 +7,10 @@ export type McpAuthStore = {
   jti?: string;
   /** Correlates tool logs with HTTP `X-Request-Id` (remote transport only). */
   requestId?: string;
+  /** W3C Trace Context traceparent header (remote transport only). */
+  traceparent?: string;
+  /** W3C Trace Context tracestate header (remote transport only). */
+  tracestate?: string;
 };
 
 export const mcpAuthContext = new AsyncLocalStorage<McpAuthStore>();

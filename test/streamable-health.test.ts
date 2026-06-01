@@ -40,7 +40,10 @@ describe("createRemoteMcpApp", () => {
 
       const ready = await fetch(`${base}/readyz`);
       expect(ready.status).toBe(200);
-      const readyBody = (await ready.json()) as { status: string; checks: Record<string, string> };
+      const readyBody = (await ready.json()) as {
+        status: string;
+        checks: Record<string, string>;
+      };
       expect(readyBody.status).toBe("ready");
       expect(readyBody.checks).toMatchObject({
         config: "ok",

@@ -65,10 +65,10 @@ describe("phase 2 report tools — execute via mocked fetch", () => {
   beforeAll(() => {
     fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (...args) => {
       const url = String(args[0]);
-      return new Response(
-        JSON.stringify({ ok: true, url, count: 0, results: [] }),
-        { status: 200, headers: { "content-type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ ok: true, url, count: 0, results: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
     });
   });
 

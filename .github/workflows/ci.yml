@@ -18,10 +18,11 @@ jobs:
         node-version: 20
         cache: 'npm'
     - run: npm ci
+    - run: npm run format:check
+    - run: npm run lint
     - run: npm run validate:examples
     - run: npm run build
     - run: npm test
-    - run: npm run lint
     - name: npm audit (production dependencies)
       run: npm audit --audit-level=high --omit=dev
     - name: Secret scan (gitleaks)

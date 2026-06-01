@@ -22,14 +22,22 @@ describe("phase 3.3 write tools — inputSchema", () => {
 
   it("update_order_status whitelists status", () => {
     const tool = registry.getTool("update_order_status")!;
-    expect(tool.inputSchema.safeParse({ order_id: 1, status: "FINISHED" }).success).toBe(true);
-    expect(tool.inputSchema.safeParse({ order_id: 1, status: "WRONG" }).success).toBe(false);
+    expect(tool.inputSchema.safeParse({ order_id: 1, status: "FINISHED" }).success).toBe(
+      true
+    );
+    expect(tool.inputSchema.safeParse({ order_id: 1, status: "WRONG" }).success).toBe(
+      false
+    );
   });
 
   it("mark_order_billed whitelists billing_status", () => {
     const tool = registry.getTool("mark_order_billed")!;
-    expect(tool.inputSchema.safeParse({ order_id: 1, billing_status: "PAID" }).success).toBe(true);
-    expect(tool.inputSchema.safeParse({ order_id: 1, billing_status: "GIFT" }).success).toBe(false);
+    expect(
+      tool.inputSchema.safeParse({ order_id: 1, billing_status: "PAID" }).success
+    ).toBe(true);
+    expect(
+      tool.inputSchema.safeParse({ order_id: 1, billing_status: "GIFT" }).success
+    ).toBe(false);
   });
 
   it("add_offer_comment requires offer_id & text", () => {
@@ -72,9 +80,9 @@ describe("phase 3.3 write tools — IFLOW_READ_ONLY enforcement", () => {
         status: "FINISHED",
       });
       expect(out.isError).toBe(true);
-      expect(
-        (out.content?.[0] as { text?: string } | undefined)?.text ?? ""
-      ).toMatch(/IFLOW_READ_ONLY/i);
+      expect((out.content?.[0] as { text?: string } | undefined)?.text ?? "").toMatch(
+        /IFLOW_READ_ONLY/i
+      );
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });

@@ -8,12 +8,10 @@ import { normalizeScopeClaim } from "../src/auth/jwt.js";
 
 describe("tokenHasAllScopes", () => {
   it("matches when all required scopes are present", () => {
-    expect(tokenHasAllScopes("tools:erp:read tools:orders:read", ["tools:erp:read"])).toBe(
-      true
-    );
     expect(
-      tokenHasAllScopes("tools:orders:write", ["tools:orders:write"])
+      tokenHasAllScopes("tools:erp:read tools:orders:read", ["tools:erp:read"])
     ).toBe(true);
+    expect(tokenHasAllScopes("tools:orders:write", ["tools:orders:write"])).toBe(true);
   });
 
   it("fails when a required scope is missing", () => {
@@ -48,18 +46,10 @@ describe("tokenAllowsTool", () => {
       )
     ).toBe(true);
     expect(
-      tokenAllowsTool(
-        "tools:orders:write:elevated",
-        "create_order",
-        "jti-reuse"
-      )
+      tokenAllowsTool("tools:orders:write:elevated", "create_order", "jti-reuse")
     ).toBe(true);
     expect(
-      tokenAllowsTool(
-        "tools:orders:write:elevated",
-        "create_order",
-        "jti-reuse"
-      )
+      tokenAllowsTool("tools:orders:write:elevated", "create_order", "jti-reuse")
     ).toBe(false);
   });
 

@@ -137,7 +137,9 @@ export function registerAllTools() {
   registry.register(iflowPlaybookIndexTool);
   registry.register(productScenariosPhase0Tool);
   registry.register(scenariul1Tool);
+  registry.register({ ...scenariul1Tool, name: "scenario_1" });
   registry.register(scenariul2Tool);
+  registry.register({ ...scenariul2Tool, name: "scenario_2" });
   registry.register(diffDiagnoseTool);
   registry.register(analyzeExecutionLoss);
   registry.register(analyzeSalesFunnel);

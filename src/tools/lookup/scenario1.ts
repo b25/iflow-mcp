@@ -44,10 +44,15 @@ export const scenariul1Tool: Tool = {
       return {
         content: [{ type: "text", text: intro }],
         structuredContent: {
-          source_files: [".plans/Scenariul_1.txt", ".plans/product-scenarios.md section C"],
+          source_files: [
+            ".plans/Scenariul_1.txt",
+            ".plans/product-scenarios.md section C",
+          ],
           perspectives: SCENARIO_1_PERSPECTIVES,
           endpoint_design_notes_ro: SCENARIO_1_ENDPOINT_NOTES_RO,
-          analyze_tool_names_in_order: SCENARIO_1_PERSPECTIVES.map((p) => p.mcpAnalyzeTool),
+          analyze_tool_names_in_order: SCENARIO_1_PERSPECTIVES.map(
+            (p) => p.mcpAnalyzeTool
+          ),
         },
       };
     }

@@ -29,8 +29,7 @@ export const iflowPlaybookIndexTool: Tool = {
         {
           tool: "scenariul_2",
           plans: [".plans/Scenariul_2.txt", ".plans/product-scenarios.md section D"],
-          summary:
-            "De ce nu mai merge ca înainte? playbook; diagnose → diff_diagnose.",
+          summary: "De ce nu mai merge ca înainte? playbook; diagnose → diff_diagnose.",
         },
         {
           tool: "health",
@@ -39,8 +38,14 @@ export const iflowPlaybookIndexTool: Tool = {
         },
       ],
       analyst_orchestration: [
-        { tool: "where_are_we_losing_money", summary: "Runs all 8 analyze_* perspectives." },
-        { tool: "diff_diagnose", summary: "Scenario 2 metric drift + events (needs Api Points)." },
+        {
+          tool: "where_are_we_losing_money",
+          summary: "Runs all 8 analyze_* perspectives.",
+        },
+        {
+          tool: "diff_diagnose",
+          summary: "Scenario 2 metric drift + events (needs Api Points).",
+        },
       ],
       further_reading: [
         ".plans/product-scenarios.md",

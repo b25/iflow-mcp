@@ -4,6 +4,7 @@ import { mapIFlowError } from "../iflow/errors.js";
 import { getMcpAuth } from "../context/mcp-auth-context.js";
 import { tokenAllowsTool } from "../auth/scopes.js";
 import { requiredScopesForTool } from "./tool-scopes.js";
+import { logger } from "../observability/logger.js";
 
 export class ToolRegistry {
   private tools: Map<string, Tool> = new Map();
@@ -37,7 +38,7 @@ export class ToolRegistry {
       const detail =
         name === "create_order"
           ? "tools:orders:write, or single-use tools:orders:write:elevated with a JWT jti"
-          : (needed?.join(" ") ?? "(see documentation)");
+          : needed?.join(" ") ?? "(see documentation)";
       throw new McpError(
         ErrorCode.InvalidRequest,
         `Insufficient scope for tool ${name}; required: ${detail}`
@@ -47,10 +48,19 @@ export class ToolRegistry {
     try {
       const parsedArgs = tool.inputSchema.safeParse(args);
       if (!parsedArgs.success) {
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          `Invalid arguments for tool ${name}: ${parsedArgs.error.message}`
+        logger.warn(
+          { tool: name, errors: parsedArgs.error.format() },
+          "Tool input validation failed"
         );
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Invalid arguments for tool ${name}: ${parsedArgs.error.message}`,
+            },
+          ],
+          isError: true,
+        };
       }
 
       return await tool.execute(parsedArgs.data);

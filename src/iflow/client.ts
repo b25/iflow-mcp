@@ -3,6 +3,7 @@ import { config } from "./config.js";
 import { logger } from "../observability/logger.js";
 import { resolveApiPoint } from "./resolve.js";
 import { redactIflowErrorBodyForLog } from "./redact-log.js";
+import { getMcpAuth } from "../context/mcp-auth-context.js";
 
 export type IFlowFetchOptions = {
   query?: Record<string, string | number | boolean | undefined>;
@@ -24,10 +25,7 @@ export class IFlowHttpError extends Error {
   }
 }
 
-async function readBodyWithCap(
-  response: Response,
-  maxBytes: number
-): Promise<string> {
+async function readBodyWithCap(response: Response, maxBytes: number): Promise<string> {
   const reader = response.body?.getReader();
   if (!reader) {
     const t = await response.text();
@@ -49,6 +47,59 @@ async function readBodyWithCap(
   const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
   return buf.toString("utf8");
 }
+
+class CircuitBreaker {
+  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
+  private failureCount = 0;
+  private nextAttemptTime = 0;
+  private readonly failureThreshold = 5; // Open circuit after 5 consecutive failures
+  private readonly recoveryTimeoutMs = 15_000; // Keep open for 15 seconds before trying again
+
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    const now = Date.now();
+    if (this.state === "OPEN") {
+      if (now > this.nextAttemptTime) {
+        this.state = "HALF_OPEN";
+        logger.info("Circuit breaker entering HALF_OPEN state; testing service health");
+      } else {
+        logger.warn("Circuit breaker is OPEN; fast-failing request");
+        throw new Error("ERP Service temporarily unavailable (Circuit Breaker OPEN)");
+      }
+    }
+
+    try {
+      const result = await fn();
+      if (this.state === "HALF_OPEN") {
+        this.state = "CLOSED";
+        this.failureCount = 0;
+        logger.info("Circuit breaker restored to CLOSED state");
+      }
+      return result;
+    } catch (error) {
+      if ((this.state as string) !== "OPEN") {
+        this.failureCount++;
+        logger.warn(
+          {
+            failureCount: this.failureCount,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          "Outbound call failed under circuit breaker protection"
+        );
+        if (this.failureCount >= this.failureThreshold) {
+          this.state = "OPEN";
+          this.nextAttemptTime = Date.now() + this.recoveryTimeoutMs;
+          logger.error(
+            { recoveryTimeoutMs: this.recoveryTimeoutMs },
+            "Circuit breaker opened; downstream calls will fast-fail"
+          );
+        }
+      }
+      throw error;
+    }
+  }
+}
+
+const clientBreaker = new CircuitBreaker();
 
 export class IFlowClient {
   private readonly cfg: AppConfig;
@@ -83,112 +134,128 @@ export class IFlowClient {
     body?: unknown,
     options?: IFlowFetchOptions
   ): Promise<T> {
-    const brokerUuid = this.cfg.IFLOW_MCP_INTEGRATION_UUID;
-    const url = brokerUuid
-      ? new URL(`${this.baseUrl}/v1/${brokerUuid}/${apiPointKey}/`)
-      : new URL(
-          `${this.baseUrl}/api-external/v1/${resolveApiPoint(apiPointKey, this.cfg.IFLOW_API_POINTS)}/`
-        );
-    if (options?.query) {
-      for (const [k, v] of Object.entries(options.query)) {
-        if (v !== undefined) url.searchParams.set(k, String(v));
-      }
-    }
+    return clientBreaker.execute(async () => {
+      const brokerUuid = this.cfg.IFLOW_MCP_INTEGRATION_UUID;
+      const rawPrefix = this.cfg.IFLOW_ENDPOINT_PATH_PREFIX ?? "/api-external/v1/";
+      const prefix = rawPrefix.endsWith("/") ? rawPrefix : `${rawPrefix}/`;
+      const cleanPrefix = prefix.startsWith("/") ? prefix.slice(1) : prefix;
 
-    if (!this.isAllowedHost(url.toString())) {
-      throw new Error(`Forbidden host: ${url.hostname}`);
-    }
-
-    const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      this.cfg.IFLOW_REQUEST_TIMEOUT_MS
-    );
-
-    try {
-      logger.debug({ method, url: url.toString() }, "iflow fetch");
-
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${this.bearer}`,
-        Accept: "application/json",
-      };
-      if (options?.confirmToken) {
-        headers["X-MCP-Confirm-Token"] = options.confirmToken;
-      }
-      if (method === "POST" || method === "PUT") {
-        headers["Content-Type"] = "application/json";
-        if (options?.idempotencyKey) {
-          headers["Idempotency-Key"] = options.idempotencyKey;
+      const url = brokerUuid
+        ? new URL(`${this.baseUrl}/v1/${brokerUuid}/${apiPointKey}/`)
+        : new URL(
+            `${this.baseUrl}/${cleanPrefix}${resolveApiPoint(apiPointKey, this.cfg.IFLOW_API_POINTS)}/`
+          );
+      if (options?.query) {
+        for (const [k, v] of Object.entries(options.query)) {
+          if (v !== undefined) url.searchParams.set(k, String(v));
         }
       }
 
-      const response = await fetch(url.toString(), {
-        method,
-        headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
-        redirect: "manual",
-      });
+      if (!this.isAllowedHost(url.toString())) {
+        throw new Error(`Forbidden host: ${url.hostname}`);
+      }
 
-      if (
-        response.status === 301 ||
-        response.status === 302 ||
-        response.status === 307 ||
-        response.status === 308
-      ) {
-        const location = response.headers.get("location");
-        if (location) {
-          if (!this.isAllowedHost(location)) {
-            throw new Error(
-              `Forbidden redirect host: ${new URL(location, url).hostname}`
-            );
+      const controller = new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.cfg.IFLOW_REQUEST_TIMEOUT_MS
+      );
+
+      try {
+        logger.debug({ method, url: url.toString() }, "iflow fetch");
+
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${this.bearer}`,
+          Accept: "application/json",
+        };
+        const auth = getMcpAuth();
+        if (auth?.requestId) {
+          headers["X-Request-Id"] = auth.requestId;
+        }
+        if (auth?.traceparent) {
+          headers["traceparent"] = auth.traceparent;
+        }
+        if (auth?.tracestate) {
+          headers["tracestate"] = auth.tracestate;
+        }
+        if (options?.confirmToken) {
+          headers["X-MCP-Confirm-Token"] = options.confirmToken;
+        }
+        if (method === "POST" || method === "PUT") {
+          headers["Content-Type"] = "application/json";
+          if (options?.idempotencyKey) {
+            headers["Idempotency-Key"] = options.idempotencyKey;
           }
         }
-        throw new Error(
-          `Unexpected redirect (status ${response.status}) to ${location || "?"}`
-        );
-      }
 
-      if (!response.ok) {
-        const errText = await readBodyWithCap(
-          response,
-          Math.min(this.cfg.IFLOW_MAX_RESPONSE_BYTES, 1_048_576)
-        );
-        let parsed: unknown = errText;
-        try {
-          parsed = JSON.parse(errText);
-        } catch {
-          /* keep text */
+        const response = await fetch(url.toString(), {
+          method,
+          headers,
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
+          redirect: "manual",
+        });
+
+        if (
+          response.status === 301 ||
+          response.status === 302 ||
+          response.status === 307 ||
+          response.status === 308
+        ) {
+          const location = response.headers.get("location");
+          if (location) {
+            if (!this.isAllowedHost(location)) {
+              throw new Error(
+                `Forbidden redirect host: ${new URL(location, url).hostname}`
+              );
+            }
+          }
+          throw new Error(
+            `Unexpected redirect (status ${response.status}) to ${location || "?"}`
+          );
         }
-        logger.error(
-          { status: response.status, errorData: redactIflowErrorBodyForLog(parsed) },
-          "iflow API error"
-        );
-        const msgFromBody =
-          parsed &&
-          typeof parsed === "object" &&
-          "message" in parsed &&
-          typeof (parsed as { message: unknown }).message === "string"
-            ? (parsed as { message: string }).message
-            : errText;
-        throw new IFlowHttpError(
-          `iflow API error: ${response.status} ${msgFromBody}`,
-          response.status,
-          parsed
-        );
-      }
 
-      const cl = response.headers.get("content-length");
-      if (cl && parseInt(cl, 10) > this.cfg.IFLOW_MAX_RESPONSE_BYTES) {
-        throw new Error("Response too large (Content-Length)");
-      }
+        if (!response.ok) {
+          const errText = await readBodyWithCap(
+            response,
+            Math.min(this.cfg.IFLOW_MAX_RESPONSE_BYTES, 1_048_576)
+          );
+          let parsed: unknown = errText;
+          try {
+            parsed = JSON.parse(errText);
+          } catch {
+            /* keep text */
+          }
+          logger.error(
+            { status: response.status, errorData: redactIflowErrorBodyForLog(parsed) },
+            "iflow API error"
+          );
+          const msgFromBody =
+            parsed &&
+            typeof parsed === "object" &&
+            "message" in parsed &&
+            typeof (parsed as { message: unknown }).message === "string"
+              ? (parsed as { message: string }).message
+              : errText;
+          throw new IFlowHttpError(
+            `iflow API error: ${response.status} ${msgFromBody}`,
+            response.status,
+            parsed
+          );
+        }
 
-      const text = await readBodyWithCap(response, this.cfg.IFLOW_MAX_RESPONSE_BYTES);
-      if (!text.length) return {} as T;
-      return JSON.parse(text) as T;
-    } finally {
-      clearTimeout(timeout);
-    }
+        const cl = response.headers.get("content-length");
+        if (cl && parseInt(cl, 10) > this.cfg.IFLOW_MAX_RESPONSE_BYTES) {
+          throw new Error("Response too large (Content-Length)");
+        }
+
+        const text = await readBodyWithCap(response, this.cfg.IFLOW_MAX_RESPONSE_BYTES);
+        if (!text.length) return {} as T;
+        return JSON.parse(text) as T;
+      } finally {
+        clearTimeout(timeout);
+      }
+    });
   }
 }
 

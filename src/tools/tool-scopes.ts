@@ -9,7 +9,9 @@ export function requiredScopesForTool(toolName: string): string[] | null {
     toolName === "iflow_playbook_index" ||
     toolName === "product_scenarios_phase0" ||
     toolName === "scenariul_1" ||
-    toolName === "scenariul_2"
+    toolName === "scenariul_2" ||
+    toolName === "scenario_1" ||
+    toolName === "scenario_2"
   ) {
     return null;
   }

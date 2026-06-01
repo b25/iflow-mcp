@@ -4,18 +4,24 @@ import { iflowClient } from "../../iflow/client.js";
 
 export const getStockTool: Tool = {
   name: "get_stock",
-  description: "Stock levels for a product (query params; backend must expose via Api Point).",
+  description:
+    "Stock levels for a product (query params; backend must expose via Api Point).",
   inputSchema: z.object({
     product_uuid: z.string().uuid(),
     warehouse_uuid: z.string().uuid().optional(),
   }),
   execute: async ({ product_uuid, warehouse_uuid }): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch<Record<string, unknown>>("get_stock", "GET", undefined, {
-      query: {
-        product_uuid,
-        ...(warehouse_uuid ? { warehouse_uuid } : {}),
-      },
-    });
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "get_stock",
+      "GET",
+      undefined,
+      {
+        query: {
+          product_uuid,
+          ...(warehouse_uuid ? { warehouse_uuid } : {}),
+        },
+      }
+    );
     return {
       content: [
         {

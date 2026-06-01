@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export function readPackageJson(): { name: string; version: string; description?: string } {
+export function readPackageJson(): {
+  name: string;
+  version: string;
+  description?: string;
+} {
   const pkgPath = join(dirname(fileURLToPath(import.meta.url)), "..", "package.json");
   return JSON.parse(readFileSync(pkgPath, "utf8")) as {
     name: string;

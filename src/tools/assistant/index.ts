@@ -24,7 +24,9 @@ const ENTITIES = [
   "activity",
 ] as const;
 
-function asQuery(args: Record<string, unknown>): Record<string, string | number | boolean> {
+function asQuery(
+  args: Record<string, unknown>
+): Record<string, string | number | boolean> {
   const out: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(args)) {
     if (v === undefined || v === null) continue;

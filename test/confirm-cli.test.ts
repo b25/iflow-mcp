@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { parseConfirmArgs } from "../src/cli/confirm.js";
 
 describe("parseConfirmArgs", () => {
@@ -53,9 +53,9 @@ describe("parseConfirmArgs", () => {
   });
 
   it("validates token format (UUID v4)", () => {
-    expect(() =>
-      parseConfirmArgs(["--key", "x", "--token", "short"])
-    ).toThrow(/invalid token format/i);
+    expect(() => parseConfirmArgs(["--key", "x", "--token", "short"])).toThrow(
+      /invalid token format/i
+    );
   });
 
   it("accepts valid UUID v4 token", () => {

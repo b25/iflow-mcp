@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Tool, MCPToolResult } from "../shapes.js";
-import { 
+import {
   analyzeExecutionLoss,
   analyzeSalesFunnel,
   analyzeReceivablesRisk,
@@ -8,7 +8,7 @@ import {
   analyzeSupplierDrift,
   analyzeWorkflowEfficiency,
   analyzeCustomerHealth,
-  analyzeCorrectionCosts
+  analyzeCorrectionCosts,
 } from "./perspectives.js";
 
 export const whereAreWeLosingMoneyTool: Tool = {
@@ -39,11 +39,18 @@ export const whereAreWeLosingMoneyTool: Tool = {
     );
 
     const allFindings = results
-      .filter((r) => !(r as { isError?: boolean }).isError && (r as { structuredContent?: unknown }).structuredContent)
+      .filter(
+        (r) =>
+          !(r as { isError?: boolean }).isError &&
+          (r as { structuredContent?: unknown }).structuredContent
+      )
       .flatMap(
         (r) =>
-          ((r as { structuredContent?: { findings?: unknown[] } }).structuredContent?.findings ??
-            []) as Array<{ severity?: string; evidence?: { n_observations?: number } }>
+          ((r as { structuredContent?: { findings?: unknown[] } }).structuredContent
+            ?.findings ?? []) as Array<{
+            severity?: string;
+            evidence?: { n_observations?: number };
+          }>
       );
 
     const severityMap = { high: 3, medium: 2, low: 1 };

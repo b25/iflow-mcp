@@ -13,15 +13,25 @@ export const analyzeFraudSignalsTool: Tool = {
     language: z.enum(["ro", "en"]).optional().default("ro"),
     min_amount: z.string().optional(),
   }),
-  execute: async ({ from, to, language, min_amount }): Promise<MCPToolResult<AnalystResult>> => {
+  execute: async ({
+    from,
+    to,
+    language,
+    min_amount,
+  }): Promise<MCPToolResult<AnalystResult>> => {
     const query: Record<string, string> = {};
     if (from) query.from = from;
     if (to) query.to = to;
     if (language) query.language = language;
     if (min_amount) query.min_amount = min_amount;
-    const data = await iflowClient.fetch<Partial<AnalystResult>>("analyze_fraud_signals", "GET", undefined, {
-      query: Object.keys(query).length ? query : undefined,
-    });
+    const data = await iflowClient.fetch<Partial<AnalystResult>>(
+      "analyze_fraud_signals",
+      "GET",
+      undefined,
+      {
+        query: Object.keys(query).length ? query : undefined,
+      }
+    );
     const normalized = normalizeAnalystResult(data, "analyze_fraud_signals");
     return applyAnalystHygiene(normalized, { language });
   },
@@ -41,9 +51,14 @@ export const analyzeStockRiskSignalsTool: Tool = {
     if (from) query.from = from;
     if (to) query.to = to;
     if (language) query.language = language;
-    const data = await iflowClient.fetch<Partial<AnalystResult>>("analyze_stock_risk_signals", "GET", undefined, {
-      query: Object.keys(query).length ? query : undefined,
-    });
+    const data = await iflowClient.fetch<Partial<AnalystResult>>(
+      "analyze_stock_risk_signals",
+      "GET",
+      undefined,
+      {
+        query: Object.keys(query).length ? query : undefined,
+      }
+    );
     const normalized = normalizeAnalystResult(data, "analyze_stock_risk_signals");
     return applyAnalystHygiene(normalized, { language });
   },

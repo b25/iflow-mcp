@@ -9,7 +9,10 @@ describe("scenariul_2", () => {
   });
 
   it("playbook returns framework and endpoint notes", async () => {
-    const out = await registry.executeTool("scenariul_2", { action: "playbook", language: "ro" });
+    const out = await registry.executeTool("scenariul_2", {
+      action: "playbook",
+      language: "ro",
+    });
     const sc = out.structuredContent as {
       framework: { phases: unknown[] };
       causal_categories: unknown[];
@@ -27,5 +30,16 @@ describe("scenariul_2", () => {
       action: "diagnose",
     });
     expect(parsed.success).toBe(false);
+  });
+
+  it("scenario_2 alias behaves identically to scenariul_2", async () => {
+    expect(registry.getTool("scenario_2")).toBeDefined();
+    const out = await registry.executeTool("scenario_2", {
+      action: "playbook",
+      language: "en",
+    });
+    expect(out.content[0].text).toContain("Scenario 2 playbook");
+    const sc = out.structuredContent as any;
+    expect(sc.framework.phases).toHaveLength(4);
   });
 });

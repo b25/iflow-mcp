@@ -1,8 +1,6 @@
-import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { registerAllTools } from "../src/tools/index.js";
 import { registry } from "../src/tools/registry.js";
-import { mcpAuthContext } from "../src/context/mcp-auth-context.js";
-import { config } from "../src/iflow/config.js";
 
 describe("additional CRUD write tools — inputSchema", () => {
   beforeEach(() => {
@@ -10,14 +8,12 @@ describe("additional CRUD write tools — inputSchema", () => {
     registerAllTools();
   });
 
-  it.each([
-    "create_client",
-    "create_product",
-    "update_product",
-    "create_administration",
-  ])("%s registered", (key) => {
-    expect(registry.getTool(key), `missing tool ${key}`).toBeDefined();
-  });
+  it.each(["create_client", "create_product", "update_product", "create_administration"])(
+    "%s registered",
+    (key) => {
+      expect(registry.getTool(key), `missing tool ${key}`).toBeDefined();
+    }
+  );
 
   it("create_client validates minimal input", () => {
     const tool = registry.getTool("create_client")!;

@@ -9,14 +9,12 @@ describe("phase 4 assistant tools — inputSchema", () => {
     registerAllTools();
   });
 
-  it.each([
-    "mcp_assistant_intro",
-    "mcp_data_dictionary",
-    "mcp_clarify",
-    "mcp_plan",
-  ])("%s registered", (key) => {
-    expect(registry.getTool(key), `missing tool ${key}`).toBeDefined();
-  });
+  it.each(["mcp_assistant_intro", "mcp_data_dictionary", "mcp_clarify", "mcp_plan"])(
+    "%s registered",
+    (key) => {
+      expect(registry.getTool(key), `missing tool ${key}`).toBeDefined();
+    }
+  );
 
   it("mcp_assistant_intro whitelists topic", () => {
     const tool = registry.getTool("mcp_assistant_intro")!;
@@ -35,7 +33,9 @@ describe("phase 4 assistant tools — inputSchema", () => {
   it("mcp_clarify requires objective", () => {
     const tool = registry.getTool("mcp_clarify")!;
     expect(tool.inputSchema.safeParse({}).success).toBe(false);
-    expect(tool.inputSchema.safeParse({ objective: "show late orders" }).success).toBe(true);
+    expect(tool.inputSchema.safeParse({ objective: "show late orders" }).success).toBe(
+      true
+    );
   });
 
   it("mcp_plan accepts answers object", () => {
@@ -117,7 +117,9 @@ describe("phase 4 assistant tools — execute via mocked fetch", () => {
         answers: { focus: "sub stoc minim", limit: 5 },
       });
       expect(out.isError).not.toBe(true);
-      expect((out.content?.[0] as { text?: string }).text).toMatch(/list_orders|order_delay_diagnosis/);
+      expect((out.content?.[0] as { text?: string }).text).toMatch(
+        /list_orders|order_delay_diagnosis/
+      );
     });
     const calledUrl = String(fetchSpy.mock.calls.at(-1)![0]);
     expect(calledUrl).toContain("answers=");

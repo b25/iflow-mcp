@@ -14,7 +14,9 @@ export interface MCPTokenClaims extends jose.JWTPayload {
 export function normalizeScopeClaim(payload: jose.JWTPayload): string {
   const raw = payload.scope ?? payload.scp;
   if (Array.isArray(raw)) {
-    return raw.filter((x): x is string => typeof x === "string" && x.length > 0).join(" ");
+    return raw
+      .filter((x): x is string => typeof x === "string" && x.length > 0)
+      .join(" ");
   }
   if (typeof raw === "string") {
     return raw;

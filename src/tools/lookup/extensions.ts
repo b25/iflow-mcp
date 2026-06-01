@@ -4,7 +4,9 @@ import { iflowClient } from "../../iflow/client.js";
 
 const isoDateTime = z.string().min(8);
 
-function mergeQuery(args: Record<string, unknown>): Record<string, string | number | boolean> {
+function mergeQuery(
+  args: Record<string, unknown>
+): Record<string, string | number | boolean> {
   const q: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(args)) {
     if (v === undefined || v === null) continue;
@@ -31,7 +33,9 @@ export const lostOffersBreakdownTool: Tool = {
       { query: mergeQuery(args) }
     );
     return {
-      content: [{ type: "text", text: `Lost offers reasons: ${result.results?.length ?? 0}.` }],
+      content: [
+        { type: "text", text: `Lost offers reasons: ${result.results?.length ?? 0}.` },
+      ],
       structuredContent: result as Record<string, unknown>,
     };
   },
@@ -39,7 +43,8 @@ export const lostOffersBreakdownTool: Tool = {
 
 export const topAgentsTool: Tool = {
   name: "top_agents",
-  description: "Top agents by order count (default 20). Optional filters: from/to, flow_id.",
+  description:
+    "Top agents by order count (default 20). Optional filters: from/to, flow_id.",
   inputSchema: z.object({
     limit: z.number().int().min(1).max(200).optional(),
     flow_id: z.number().int().positive().optional(),
@@ -107,7 +112,9 @@ export const ordersByStageTool: Tool = {
       { query: mergeQuery(args) }
     );
     return {
-      content: [{ type: "text", text: `Stages with orders: ${result.results?.length ?? 0}.` }],
+      content: [
+        { type: "text", text: `Stages with orders: ${result.results?.length ?? 0}.` },
+      ],
       structuredContent: result as Record<string, unknown>,
     };
   },

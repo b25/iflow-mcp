@@ -80,7 +80,10 @@ export async function runConfirmCli(argv: string[]): Promise<number> {
   const base = cfg.IFLOW_BASE_URL.endsWith("/")
     ? cfg.IFLOW_BASE_URL.slice(0, -1)
     : cfg.IFLOW_BASE_URL;
-  const url = new URL(`${base}/api-external/v1/${pathUuid}/`);
+  const rawPrefix = cfg.IFLOW_ENDPOINT_PATH_PREFIX ?? "/api-external/v1/";
+  const prefix = rawPrefix.endsWith("/") ? rawPrefix : `${rawPrefix}/`;
+  const cleanPrefix = prefix.startsWith("/") ? prefix.slice(1) : prefix;
+  const url = new URL(`${base}/${cleanPrefix}${pathUuid}/`);
   if (!isAllowedHost(cfg.IFLOW_ALLOWED_HOSTS, url.toString())) {
     console.error(`Forbidden host: ${url.hostname}`);
     return 1;

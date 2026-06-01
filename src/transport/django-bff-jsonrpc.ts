@@ -3,10 +3,7 @@
  * `tools/list` / `tools/call` without opening an SSE session (see `streamable.ts`).
  */
 import type { Request, Response } from "express";
-import {
-  ErrorCode,
-  McpError,
-} from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { logger } from "../observability/logger.js";
 import { trackToolMetrics } from "../observability/metrics.js";
 import { registry } from "../tools/registry.js";
@@ -102,7 +99,9 @@ export async function handleDjangoBffJsonRpc(
         if (!name) {
           throw new McpError(ErrorCode.InvalidParams, "tools/call requires params.name");
         }
-        const result = await trackToolMetrics(name, () => registry.executeTool(name, args));
+        const result = await trackToolMetrics(name, () =>
+          registry.executeTool(name, args)
+        );
         const structuredContent = structuredToRecord(result.structuredContent);
         res.json({
           jsonrpc: "2.0",

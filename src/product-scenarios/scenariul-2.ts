@@ -3,7 +3,10 @@
  * Source: `.plans/Scenariul_2.txt` + alignment with `.plans/product-scenarios.md` section D.
  */
 
-export const SCENARIO_2_SOURCE_FILES = [".plans/Scenariul_2.txt", ".plans/product-scenarios.md section D"];
+export const SCENARIO_2_SOURCE_FILES = [
+  ".plans/Scenariul_2.txt",
+  ".plans/product-scenarios.md section D",
+];
 
 export const SCENARIO_2_FRAMEWORK_RO = {
   title: "Diagnostic comparativ — schimbări față de un trecut care funcționa",
@@ -100,57 +103,60 @@ export const SCENARIO_2_MONITORING_GROUPS: { groupRo: string; metricsRo: string[
 ];
 
 /** Șase categorii de cauze (Faza 3) — Scenariul_2.txt A–F. */
-export const SCENARIO_2_CAUSAL_CATEGORIES: { code: string; labelRo: string; examplesRo: string[] }[] =
-  [
-    {
-      code: "A",
-      labelRo: "Persoană",
-      examplesRo: [
-        "Angajat nou pe etapă; plecare/concediu; schimbare manager cont",
-        "Volum muncă (ex. 3× mai multe etape)",
-      ],
-    },
-    {
-      code: "B",
-      labelRo: "Proces / configurare",
-      examplesRo: [
-        "Flux modificat; preț produs; adaos categorie client",
-        "Permisiuni; notificări automate",
-      ],
-    },
-    {
-      code: "C",
-      labelRo: "Partener (furnizor sau client)",
-      examplesRo: [
-        "Furnizor nou / preț în creștere / livrări parțiale",
-        "Client mare − volum; client nou deformează statistici",
-      ],
-    },
-    {
-      code: "D",
-      labelRo: "Produs / mix",
-      examplesRo: [
-        "Produs nou / scos din vânzare",
-        "Schimbare mix; retururi (calitate / așteptări)",
-      ],
-    },
-    {
-      code: "E",
-      labelRo: "Pattern temporal",
-      examplesRo: [
-        "Sezonalitate; end-of-month/quarter",
-        "Sărbători; vacanțe; evenimente externe",
-      ],
-    },
-    {
-      code: "F",
-      labelRo: "Date / operare",
-      examplesRo: [
-        "Instrucțiuni incomplete; comenzi fără ofertă",
-        "Documente nefacturate; editări multiple",
-      ],
-    },
-  ];
+export const SCENARIO_2_CAUSAL_CATEGORIES: {
+  code: string;
+  labelRo: string;
+  examplesRo: string[];
+}[] = [
+  {
+    code: "A",
+    labelRo: "Persoană",
+    examplesRo: [
+      "Angajat nou pe etapă; plecare/concediu; schimbare manager cont",
+      "Volum muncă (ex. 3× mai multe etape)",
+    ],
+  },
+  {
+    code: "B",
+    labelRo: "Proces / configurare",
+    examplesRo: [
+      "Flux modificat; preț produs; adaos categorie client",
+      "Permisiuni; notificări automate",
+    ],
+  },
+  {
+    code: "C",
+    labelRo: "Partener (furnizor sau client)",
+    examplesRo: [
+      "Furnizor nou / preț în creștere / livrări parțiale",
+      "Client mare − volum; client nou deformează statistici",
+    ],
+  },
+  {
+    code: "D",
+    labelRo: "Produs / mix",
+    examplesRo: [
+      "Produs nou / scos din vânzare",
+      "Schimbare mix; retururi (calitate / așteptări)",
+    ],
+  },
+  {
+    code: "E",
+    labelRo: "Pattern temporal",
+    examplesRo: [
+      "Sezonalitate; end-of-month/quarter",
+      "Sărbători; vacanțe; evenimente externe",
+    ],
+  },
+  {
+    code: "F",
+    labelRo: "Date / operare",
+    examplesRo: [
+      "Instrucțiuni incomplete; comenzi fără ofertă",
+      "Documente nefacturate; editări multiple",
+    ],
+  },
+];
 
 export const SCENARIO_2_WORKED_EXAMPLE_RO = {
   anomaly: "Timpul mediu pe etapa „Finisaj” a crescut cu 47% începând cu 15 martie.",

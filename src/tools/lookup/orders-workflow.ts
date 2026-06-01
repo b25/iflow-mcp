@@ -8,7 +8,10 @@ export const listWorkFlowsTool: Tool = {
     "List work flows (FlowSettings) with ids — use flow_id in orders_flow_stage_report and list_flow_stages.",
   inputSchema: z.object({}),
   execute: async (): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch<Record<string, unknown>>("list_work_flows", "GET");
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "list_work_flows",
+      "GET"
+    );
     return {
       content: [{ type: "text", text: "list_work_flows completed." }],
       structuredContent: result,
@@ -24,9 +27,14 @@ export const listFlowStagesTool: Tool = {
     flow_id: z.number().int().positive(),
   }),
   execute: async ({ flow_id }): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch<Record<string, unknown>>("list_flow_stages", "GET", undefined, {
-      query: { flow_id },
-    });
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "list_flow_stages",
+      "GET",
+      undefined,
+      {
+        query: { flow_id },
+      }
+    );
     return {
       content: [{ type: "text", text: "list_flow_stages completed." }],
       structuredContent: result,
@@ -36,10 +44,14 @@ export const listFlowStagesTool: Tool = {
 
 export const listUserDepartmentsTool: Tool = {
   name: "list_user_departments",
-  description: "List user departments (UserDepartment) — use ids as department_id in orders_flow_stage_report.",
+  description:
+    "List user departments (UserDepartment) — use ids as department_id in orders_flow_stage_report.",
   inputSchema: z.object({}),
   execute: async (): Promise<MCPToolResult> => {
-    const result = await iflowClient.fetch<Record<string, unknown>>("list_user_departments", "GET");
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "list_user_departments",
+      "GET"
+    );
     return {
       content: [{ type: "text", text: "list_user_departments completed." }],
       structuredContent: result,
@@ -68,9 +80,14 @@ export const ordersFlowStageReportTool: Tool = {
     if (args.stage_id != null) q.stage_id = args.stage_id;
     if (args.department_id != null) q.department_id = args.department_id;
     if (args.limit != null) q.limit = args.limit;
-    const result = await iflowClient.fetch<Record<string, unknown>>("orders_flow_stage_report", "GET", undefined, {
-      query: q,
-    });
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "orders_flow_stage_report",
+      "GET",
+      undefined,
+      {
+        query: q,
+      }
+    );
     return {
       content: [{ type: "text", text: "orders_flow_stage_report completed." }],
       structuredContent: result,
@@ -89,9 +106,14 @@ export const orderProcessingHistoryTool: Tool = {
   execute: async ({ order_id, limit }): Promise<MCPToolResult> => {
     const q: Record<string, string | number> = { order_id };
     if (limit != null) q.limit = limit;
-    const result = await iflowClient.fetch<Record<string, unknown>>("order_processing_history", "GET", undefined, {
-      query: q,
-    });
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "order_processing_history",
+      "GET",
+      undefined,
+      {
+        query: q,
+      }
+    );
     return {
       content: [{ type: "text", text: "order_processing_history completed." }],
       structuredContent: result,
@@ -117,9 +139,14 @@ export const hoursWorkedPerEmployeeTool: Tool = {
     }
     if (args.from) q.from = args.from;
     if (args.to) q.to = args.to;
-    const result = await iflowClient.fetch<Record<string, unknown>>("hours_worked_per_employee", "GET", undefined, {
-      query: q,
-    });
+    const result = await iflowClient.fetch<Record<string, unknown>>(
+      "hours_worked_per_employee",
+      "GET",
+      undefined,
+      {
+        query: q,
+      }
+    );
     return {
       content: [{ type: "text", text: "hours_worked_per_employee completed." }],
       structuredContent: result,

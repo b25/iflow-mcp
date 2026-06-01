@@ -9,10 +9,10 @@ export const healthTool: Tool = {
   inputSchema: z.object({}),
   execute: async (): Promise<MCPToolResult> => {
     const keys = Object.keys(config.IFLOW_API_POINTS).sort();
-    const transport = config.IFLOW_MCP_INTEGRATION_UUID ? "django_broker" : "api_external";
-    const brokerHint = config.IFLOW_MCP_INTEGRATION_UUID
-      ? ` broker_uuid_set=true`
-      : "";
+    const transport = config.IFLOW_MCP_INTEGRATION_UUID
+      ? "django_broker"
+      : "api_external";
+    const brokerHint = config.IFLOW_MCP_INTEGRATION_UUID ? ` broker_uuid_set=true` : "";
     return {
       content: [
         {

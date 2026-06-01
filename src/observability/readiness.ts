@@ -64,6 +64,36 @@ export async function runReadinessChecks(
       return { ready: false, checks };
     }
     checks.jwks = "ok";
+
+    // Outbound ping check to downstream ERP backend /healthz
+    const isTest = process.env.NODE_ENV === "test";
+    if (!isTest) {
+      try {
+        const healthUrl = `${
+          config.IFLOW_BASE_URL.endsWith("/")
+            ? config.IFLOW_BASE_URL.slice(0, -1)
+            : config.IFLOW_BASE_URL
+        }/healthz`;
+        const erpRes = await fetch(healthUrl, {
+          method: "GET",
+          signal: AbortSignal.timeout(3000),
+        });
+        if (erpRes.ok) {
+          checks.erp_backend = "ok";
+        } else {
+          checks.erp_backend = `http_${erpRes.status}`;
+          return { ready: false, checks };
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        checks.erp_backend =
+          message.length > 120 ? `${message.slice(0, 117)}...` : message;
+        return { ready: false, checks };
+      }
+    } else {
+      checks.erp_backend = "ok";
+    }
+
     return { ready: true, checks };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

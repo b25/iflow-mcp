@@ -47,8 +47,19 @@ export const listOrdersTool: Tool = {
       ])
       .optional()
       .describe("Sort order for results"),
-    limit: z.number().int().min(1).max(500).optional().describe("Maximum number of results (default: 20)"),
-    offset: z.number().int().min(0).optional().describe("Number of results to skip (for pagination)"),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(500)
+      .optional()
+      .describe("Maximum number of results (default: 20)"),
+    offset: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe("Number of results to skip (for pagination)"),
   }),
   execute: async (args): Promise<MCPToolResult> => {
     const q: Record<string, string | number | boolean> = {};
@@ -104,7 +115,7 @@ export const buildOrdersFilterTool: Tool = {
       .describe("Filter values collected so far"),
   }),
   execute: async (args): Promise<MCPToolResult> => {
-    const { step, context, current_filter } = args;
+    const { step, current_filter } = args;
 
     const getPromptByStep = (currentStep: string): string => {
       switch (currentStep) {
@@ -215,9 +226,7 @@ export const buildOrdersFilterTool: Tool = {
       response =
         getPromptByStep("status") +
         "\n\n" +
-        (prevFilter.status
-          ? `Current: status=${prevFilter.status}\n`
-          : "") +
+        (prevFilter.status ? `Current: status=${prevFilter.status}\n` : "") +
         "Type a status value (NEW/IN_PROCESS/FINISHED/OUT_OF_STOCK/CANCEL) or 'skip'.";
     } else if (step === "date_range") {
       response =

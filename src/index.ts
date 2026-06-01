@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+if (process.env.IFLOW_OTEL_ENABLED === "1") {
+  await import("./observability/tracing.js");
+}
 import { handleCliArgs } from "./meta.js";
 
 const argv = process.argv.slice(2);

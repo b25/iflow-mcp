@@ -21,17 +21,70 @@ type SessionEntry = {
 
 const sseSessions = new Map<string, SessionEntry>();
 
+// Custom zero-dependency IP rate-limiter
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+let rateLimitCleanupTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleRateLimitCleanup(): void {
+  if (rateLimitCleanupTimer) return;
+  rateLimitCleanupTimer = setTimeout(() => {
+    const now = Date.now();
+    for (const [ip, record] of rateLimitStore.entries()) {
+      if (now > record.resetTime) {
+        rateLimitStore.delete(ip);
+      }
+    }
+    rateLimitCleanupTimer = null;
+    if (rateLimitStore.size > 0) {
+      scheduleRateLimitCleanup();
+    }
+  }, 60_000);
+  rateLimitCleanupTimer.unref(); // Ensure clean event loop exits
+}
+
+function rateLimiter(req: Request, res: Response, next: express.NextFunction): void {
+  const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
+  const now = Date.now();
+  const windowMs = 60_000;
+  const maxRequests = 120;
+
+  let record = rateLimitStore.get(ip);
+  if (!record || now > record.resetTime) {
+    record = { count: 0, resetTime: now + windowMs };
+  }
+
+  record.count++;
+  rateLimitStore.set(ip, record);
+  scheduleRateLimitCleanup();
+
+  const remaining = Math.max(0, maxRequests - record.count);
+  res.setHeader("X-RateLimit-Limit", maxRequests);
+  res.setHeader("X-RateLimit-Remaining", remaining);
+  res.setHeader("X-RateLimit-Reset", Math.ceil(record.resetTime / 1000));
+
+  if (record.count > maxRequests) {
+    logger.warn({ ip, count: record.count }, "Rate limit exceeded");
+    res.status(429).json({ error: "Too Many Requests", details: "Rate limit exceeded" });
+    return;
+  }
+  next();
+}
+
 function runWithMcpAuth(
   req: Request,
   claims: MCPTokenClaims,
   fn: () => Promise<void>
 ): Promise<void> {
   const requestId = (req as Request & { requestId?: string }).requestId;
+  const traceparent = req.headers["traceparent"];
+  const tracestate = req.headers["tracestate"];
   return mcpAuthContext.run(
     {
       scope: claims.scope,
       jti: typeof claims.jti === "string" ? claims.jti : undefined,
       requestId,
+      traceparent: typeof traceparent === "string" ? traceparent : undefined,
+      tracestate: typeof tracestate === "string" ? tracestate : undefined,
     },
     fn
   );
@@ -98,7 +151,9 @@ export function createRemoteMcpApp(): Express {
       if (config.IFLOW_BFF_ONLY) {
         const expected = (config.IFLOW_BFF_SHARED_SECRET ?? "").trim();
         if (!expected) {
-          throw new Error("IFLOW_BFF_ONLY is enabled but IFLOW_BFF_SHARED_SECRET is not configured");
+          throw new Error(
+            "IFLOW_BFF_ONLY is enabled but IFLOW_BFF_SHARED_SECRET is not configured"
+          );
         }
         const raw = req.headers["x-bff-secret"];
         const bffSecret =
@@ -127,7 +182,7 @@ export function createRemoteMcpApp(): Express {
     await handleDjangoBffJsonRpc(req, res, claims);
   });
 
-  app.get("/sse", requireAuth, async (req: Request, res: Response) => {
+  app.get("/sse", rateLimiter, requireAuth, async (req: Request, res: Response) => {
     const claims = (req as AuthedRequest).auth;
     await runWithMcpAuth(req, claims, async () => {
       const mcpServer = createConfiguredMcpServer();
@@ -155,11 +210,13 @@ export function createRemoteMcpApp(): Express {
     });
   });
 
-  app.post("/messages", requireAuth, async (req: Request, res: Response) => {
+  app.post("/messages", rateLimiter, requireAuth, async (req: Request, res: Response) => {
     const sid = sessionIdFromQuery(req);
     const entry = sid ? sseSessions.get(sid) : undefined;
     if (!entry) {
-      res.status(400).json({ error: "Unknown or expired sessionId; open GET /sse first" });
+      res
+        .status(400)
+        .json({ error: "Unknown or expired sessionId; open GET /sse first" });
       return;
     }
     const claims = (req as AuthedRequest).auth;
@@ -180,4 +237,18 @@ export function startRemoteServer(): HttpServer {
     logger.info({ port, host }, "Remote MCP server listening");
   });
   return httpServer;
+}
+
+export async function closeAllSessions(): Promise<void> {
+  logger.info({ sessionsCount: sseSessions.size }, "Closing all active SSE sessions");
+  const promises: Promise<void>[] = [];
+  for (const [sid, entry] of sseSessions.entries()) {
+    try {
+      promises.push(entry.server.close());
+    } catch (err) {
+      logger.warn({ err, sessionId: sid }, "Error closing MCP server on shutdown");
+    }
+  }
+  await Promise.allSettled(promises);
+  sseSessions.clear();
 }

@@ -1,6 +1,6 @@
 import type { Server as HttpServer } from "node:http";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { startRemoteServer } from "./streamable.js";
+import { startRemoteServer, closeAllSessions } from "./streamable.js";
 import { logger } from "../observability/logger.js";
 import { createStdioTransport } from "./stdio.js";
 
@@ -9,6 +9,12 @@ const HTTP_SHUTDOWN_MS = 10_000;
 function installHttpShutdown(httpServer: HttpServer): void {
   const onSignal = (signal: NodeJS.Signals) => {
     logger.info({ signal }, "Shutdown signal received, closing HTTP server");
+
+    // Close all SSE sessions gracefully
+    closeAllSessions().catch((err) => {
+      logger.error(err, "Error closing SSE sessions during shutdown");
+    });
+
     httpServer.close((err) => {
       if (err) {
         logger.error(err, "HTTP server close error");
@@ -16,6 +22,15 @@ function installHttpShutdown(httpServer: HttpServer): void {
       }
       process.exit(0);
     });
+
+    // Force close active connections after a brief delay to allow pending requests to drain
+    setTimeout(() => {
+      logger.warn("Forcing active HTTP connections shutdown");
+      if (typeof httpServer.closeAllConnections === "function") {
+        httpServer.closeAllConnections();
+      }
+    }, 2000).unref();
+
     setTimeout(() => {
       logger.error("Shutdown timeout, forcing exit");
       process.exit(1);

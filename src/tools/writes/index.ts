@@ -17,7 +17,9 @@ function readOnlyError(action: string): MCPToolResult {
   };
 }
 
-function flatten(args: Record<string, unknown>): Record<string, string | number | boolean> {
+function flatten(
+  args: Record<string, unknown>
+): Record<string, string | number | boolean> {
   const out: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(args)) {
     if (v === undefined || v === null) continue;
@@ -150,15 +152,14 @@ export const addClientNoteTool: Tool = {
   execute: async (args): Promise<MCPToolResult> => {
     if (config.IFLOW_READ_ONLY) return readOnlyError("add_client_note");
     const { confirm, ...rest } = args;
-    const result = await iflowClient.fetch<{ ok?: boolean; error?: string; note_id?: number }>(
-      "add_client_note",
-      "GET",
-      undefined,
-      {
-        query: flatten(rest as Record<string, unknown>),
-        confirmToken: confirm ? "mcp_confirm=1" : undefined,
-      }
-    );
+    const result = await iflowClient.fetch<{
+      ok?: boolean;
+      error?: string;
+      note_id?: number;
+    }>("add_client_note", "GET", undefined, {
+      query: flatten(rest as Record<string, unknown>),
+      confirmToken: confirm ? "mcp_confirm=1" : undefined,
+    });
     return {
       content: [
         {

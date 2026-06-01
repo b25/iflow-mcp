@@ -12,7 +12,9 @@ describe("phase 1.2 listings tools — inputSchema", () => {
   it("list_orders accepts finished+limit", () => {
     const tool = registry.getTool("list_orders");
     expect(tool).toBeDefined();
-    expect(tool!.inputSchema.safeParse({ finished: false, limit: 20 }).success).toBe(true);
+    expect(tool!.inputSchema.safeParse({ finished: false, limit: 20 }).success).toBe(
+      true
+    );
     expect(
       tool!.inputSchema.safeParse({ order_by: "date_order_desc", from: "2026-01-01" })
         .success
@@ -45,13 +47,17 @@ describe("phase 1.2 listings tools — inputSchema", () => {
   ])("%s is registered with object inputSchema", (key) => {
     const tool = registry.getTool(key);
     expect(tool, `tool ${key} missing from registry`).toBeDefined();
-    expect(tool!.inputSchema.safeParse({}).success || tool!.name === "mcp_query_assist").toBe(true);
+    expect(
+      tool!.inputSchema.safeParse({}).success || tool!.name === "mcp_query_assist"
+    ).toBe(true);
   });
 
   it("mcp_query_assist requires objective", () => {
     const tool = registry.getTool("mcp_query_assist");
     expect(tool!.inputSchema.safeParse({}).success).toBe(false);
-    expect(tool!.inputSchema.safeParse({ objective: "show late orders" }).success).toBe(true);
+    expect(tool!.inputSchema.safeParse({ objective: "show late orders" }).success).toBe(
+      true
+    );
   });
 
   it("list_partners accepts tag_ids both as array and string", () => {
@@ -94,10 +100,10 @@ describe("phase 1.2 listings tools — executeTool via mocked fetch", () => {
   beforeAll(() => {
     fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (...args) => {
       const url = String(args[0]);
-      return new Response(
-        JSON.stringify({ ok: true, url, count: 0, results: [] }),
-        { status: 200, headers: { "content-type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ ok: true, url, count: 0, results: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
     });
   });
 
