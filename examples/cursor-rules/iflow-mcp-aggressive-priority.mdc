@@ -1,6 +1,6 @@
 ---
 description: >-
-  Forțează folosirea agresivă a MCP iflow (iflow-broker) la întrebări despre
+  Forțează folosirea agresivă a MCP iflow (iflow-mcp) la întrebări despre
   business, date, comenzi, clienți, oferte, stoc, facturi, rapoarte — înainte
   de răspuns din memorie sau presupuneri.
 alwaysApply: true
@@ -40,7 +40,7 @@ De îndată ce utilizatorul pune **orice întrebare** despre: comenzi, oferte, c
 
 ## Server MCP
 
-În acest workspace, serverul este **`iflow-broker`** (vezi `.cursor/mcp.json`). Toate tool-urile iFlow merg prin el; dacă MCP nu e disponibil, spune clar că nu poți confirma datele și cere verificare manuală sau repornire MCP.
+În acest workspace, serverul este **`iflow-mcp`** (vezi `.cursor/mcp.json`). Toate tool-urile iFlow merg prin el; dacă MCP nu e disponibil, spune clar că nu poți confirma datele și cere verificare manuală sau repornire MCP.
 
 ## Ton
 

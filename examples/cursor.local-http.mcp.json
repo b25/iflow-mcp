@@ -9,7 +9,7 @@
         "IFLOW_ALLOWED_HOSTS": "localhost",
         "IFLOW_API_BEARER": "${env:IFLOW_API_BEARER}",
         "IFLOW_API_POINTS": "${env:IFLOW_API_POINTS}",
-        "IFLOW_READ_ONLY": "1"
+        "IFLOW_READ_ONLY": "0"
       }
     }
   }

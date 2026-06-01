@@ -30,7 +30,7 @@ Fișiere de referință în repo-ul iflow-mcp:
 - `examples/openai-codex-config.toml` — Codex CLI
 
 Cerințe (configurare):
-1. Întreabă-mă: calea absolută către `iflow-mcp/dist/index.js`, `IFLOW_BASE_URL` (doar hostul pentru `IFLOW_ALLOWED_HOSTS`), dacă folosesc mod broker sau api-external, și dacă vreau `IFLOW_READ_ONLY=1`.
+1. Întreabă-mă: calea absolută către `iflow-mcp/dist/index.js`, `IFLOW_BASE_URL` (opțional `IFLOW_ALLOWED_HOSTS` dacă ai mai multe hosturi; altfel se derivă hostname-ul din URL), dacă folosesc mod broker sau api-external, și dacă vreau `IFLOW_READ_ONLY=1` (implicit `0`).
 2. Generează **un singur** snippet JSON valid pentru clientul pe care îl aleg eu (Cursor sau Claude Desktop), cu `"command": "node"`, `"args": ["/cale/absolută/dist/index.js"]`, și `"env": { ... }`. Nu pune secrete în clar dacă pot folosi `${env:NUME_VAR}` (Cursor).
 3. Reamintește: după modificarea Api Points în Django, actualizez `IFLOW_API_POINTS` și rulez `npm run build` în iflow-mcp dacă am schimbat codul serverului.
 

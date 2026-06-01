@@ -33,6 +33,17 @@ describe("parseEnv", () => {
     if (r.ok) expect(r.data.IFLOW_ALLOW_INSECURE_HTTP).toBe(true);
   });
 
+  it("defaults IFLOW_ALLOWED_HOSTS from IFLOW_BASE_URL hostname when omitted", () => {
+    const r = parseEnv({
+      IFLOW_BASE_URL: "http://localhost:8000",
+      IFLOW_ALLOW_INSECURE_HTTP: "1",
+      IFLOW_API_BEARER: "t",
+      IFLOW_API_POINTS: "{}",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.IFLOW_ALLOWED_HOSTS).toEqual(["localhost"]);
+  });
+
   it("parses IFLOW_ALLOWED_HOSTS list", () => {
     const r = parseEnv({
       IFLOW_BASE_URL: "https://erp.example.com",
@@ -57,29 +68,29 @@ describe("parseEnv", () => {
     if (r.ok) expect(r.data.IFLOW_READ_ONLY).toBe(false);
   });
 
-  it("defaults IFLOW_READ_ONLY to true when IFLOW_MCP_TRANSPORT is http", () => {
+  it("defaults IFLOW_READ_ONLY to false when IFLOW_MCP_TRANSPORT is http", () => {
     const r = parseEnv({
       IFLOW_BASE_URL: "https://erp.example.com",
       IFLOW_ALLOWED_HOSTS: "erp.example.com",
       IFLOW_API_BEARER: "t",
       IFLOW_API_POINTS: "{}",
       IFLOW_MCP_TRANSPORT: "http",
-    });
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.data.IFLOW_READ_ONLY).toBe(true);
-  });
-
-  it("honors IFLOW_READ_ONLY=0 when IFLOW_MCP_TRANSPORT is http", () => {
-    const r = parseEnv({
-      IFLOW_BASE_URL: "https://erp.example.com",
-      IFLOW_ALLOWED_HOSTS: "erp.example.com",
-      IFLOW_API_BEARER: "t",
-      IFLOW_API_POINTS: "{}",
-      IFLOW_MCP_TRANSPORT: "http",
-      IFLOW_READ_ONLY: "0",
     });
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.data.IFLOW_READ_ONLY).toBe(false);
+  });
+
+  it("honors IFLOW_READ_ONLY=1 when IFLOW_MCP_TRANSPORT is http", () => {
+    const r = parseEnv({
+      IFLOW_BASE_URL: "https://erp.example.com",
+      IFLOW_ALLOWED_HOSTS: "erp.example.com",
+      IFLOW_API_BEARER: "t",
+      IFLOW_API_POINTS: "{}",
+      IFLOW_MCP_TRANSPORT: "http",
+      IFLOW_READ_ONLY: "1",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data.IFLOW_READ_ONLY).toBe(true);
   });
 
   it("defaults IFLOW_HTTP_BIND_HOST to loopback", () => {

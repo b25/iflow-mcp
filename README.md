@@ -30,7 +30,7 @@ CLI flags (no `IFLOW_*` env required):
 
 ### Remote HTTP transport (optional)
 
-Set **`IFLOW_MCP_TRANSPORT=http`** to serve MCP over SSE instead of **stdio** (the default). The HTTP server listens when `IFLOW_MCP_TRANSPORT=http` (default port from `PORT` or `3000`). **Remote mode defaults to `IFLOW_READ_ONLY=1`** until you set `IFLOW_READ_ONLY=0` explicitly. The process listens on **`IFLOW_HTTP_BIND_HOST`** (default **`127.0.0.1`**; use **`0.0.0.0`** in Docker). Responses include **`X-Request-Id`** (echoed from the incoming header or generated). **`GET /healthz`** (liveness) is unauthenticated. **`GET /readyz`** is unauthenticated but returns **503** when `IFLOW_MCP_TRANSPORT=http` and the full OAuth trio (`IFLOW_OAUTH_ISSUER`, `IFLOW_OAUTH_JWKS_URL`, `IFLOW_MCP_AUDIENCE`) is missing, when OAuth is only partly set, or when all three are set but the JWKS URL is unreachable or not a valid JWKS document. Use **`/healthz`** for minimal container probes if you have not configured OAuth yet.
+Set **`IFLOW_MCP_TRANSPORT=http`** to serve MCP over SSE instead of **stdio** (the default). The HTTP server listens when `IFLOW_MCP_TRANSPORT=http` (default port from `PORT` or `3000`). **`IFLOW_READ_ONLY`** defaults to **`0`** (writes allowed unless broker policies apply); set **`IFLOW_READ_ONLY=1`** for read-only HTTP deployments. The process listens on **`IFLOW_HTTP_BIND_HOST`** (default **`127.0.0.1`**; use **`0.0.0.0`** in Docker). Responses include **`X-Request-Id`** (echoed from the incoming header or generated). **`GET /healthz`** (liveness) is unauthenticated. **`GET /readyz`** is unauthenticated but returns **503** when `IFLOW_MCP_TRANSPORT=http` and the full OAuth trio (`IFLOW_OAUTH_ISSUER`, `IFLOW_OAUTH_JWKS_URL`, `IFLOW_MCP_AUDIENCE`) is missing, when OAuth is only partly set, or when all three are set but the JWKS URL is unreachable or not a valid JWKS document. Use **`/healthz`** for minimal container probes if you have not configured OAuth yet.
 
 **SSE sessions:** each **`GET /sse`** connection creates an isolated MCP server instance. The SSE endpoint returns a URL for **`POST /messages`** that includes a **`sessionId`** query parameter; clients must post JSON-RPC to that URL (same Bearer token) so messages reach the correct session.
 
@@ -80,7 +80,7 @@ Fișiere de referință în repo-ul iflow-mcp:
 - `examples/openai-codex-config.toml` — Codex CLI
 
 Cerințe (configurare):
-1. Întreabă-mă: calea absolută către `iflow-mcp/dist/index.js`, `IFLOW_BASE_URL` (doar hostul pentru `IFLOW_ALLOWED_HOSTS`), dacă folosesc mod broker sau api-external, și dacă vreau `IFLOW_READ_ONLY=1`.
+1. Întreabă-mă: calea absolută către `iflow-mcp/dist/index.js`, `IFLOW_BASE_URL` (opțional: `IFLOW_ALLOWED_HOSTS` doar dacă ai mai multe hosturi; altfel se derivă hostname-ul din URL), dacă folosesc mod broker sau api-external, și dacă vreau `IFLOW_READ_ONLY=1` (implicit `0`).
 2. Generează **un singur** snippet JSON valid pentru clientul pe care îl aleg eu (Cursor sau Claude Desktop), cu `"command": "node"`, `"args": ["/cale/absolută/dist/index.js"]`, și `"env": { ... }`. Nu pune secrete în clar dacă pot folosi `${env:NUME_VAR}` (Cursor).
 3. Reamintește: după modificarea Api Points în Django, actualizez `IFLOW_API_POINTS` și rulez `npm run build` în iflow-mcp dacă am schimbat codul serverului.
 
@@ -167,7 +167,7 @@ For tools that are not plain **Clients / Products / Orders** list endpoints, the
 - **Request correlation (HTTP)** — tool completion logs include `requestId` when running inside the remote transport (matches response `X-Request-Id`).
 - **HTTPS** for `IFLOW_BASE_URL` by default; **`IFLOW_ALLOW_INSECURE_HTTP=1`** opts into `http://` for local dev only
 - **PromoArt two-phase confirmation** — if api-external returns **`403`** with **`code: confirmation_required`**, complete the same logical Api Point with **`iflow-mcp confirm --key <IFLOW_API_POINTS key> [--token <confirm_token>]`** (sends `X-MCP-Confirm-Token`). Token也可 provided via **`IFLOW_CONFIRM_TOKEN`** environment variable to avoid CLI argument exposure. MCP tools map that error to a short user message (no token echoed). Error logs redact `details.confirm_token` / `pending_id`.
-- **Host allowlist** (`IFLOW_ALLOWED_HOSTS`) and `redirect: manual` on the HTTP client
+- **Host allowlist** (`IFLOW_ALLOWED_HOSTS`, optional — defaults to `IFLOW_BASE_URL` hostname) and `redirect: manual` on the HTTP client
 - **Log redaction** for `Authorization` headers (pino)
 - **Read-only mode** via `IFLOW_READ_ONLY=1` (disables `create_order`)
 - **Idempotency-Key** header on `create_order`

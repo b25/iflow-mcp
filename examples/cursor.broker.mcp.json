@@ -1,16 +1,15 @@
 {
   "mcpServers": {
-    "iflow-broker": {
+    "iflow-mcp": {
       "command": "node",
       "args": ["/absolute/path/to/iflow-mcp/dist/index.js"],
       "env": {
         "IFLOW_BASE_URL": "http://127.0.0.1:8000",
         "IFLOW_ALLOW_INSECURE_HTTP": "1",
-        "IFLOW_ALLOWED_HOSTS": "127.0.0.1",
         "IFLOW_API_BEARER": "${env:IFLOW_API_BEARER}",
         "IFLOW_API_POINTS": "{}",
         "IFLOW_MCP_INTEGRATION_UUID": "${env:IFLOW_MCP_INTEGRATION_UUID}",
-        "IFLOW_READ_ONLY": "1"
+        "IFLOW_READ_ONLY": "0"
       }
     }
   }

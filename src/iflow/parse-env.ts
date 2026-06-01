@@ -2,9 +2,6 @@ import { z } from "zod";
 
 export function applyTransportDefaults(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const out: NodeJS.ProcessEnv = { ...env };
-  if (out.IFLOW_MCP_TRANSPORT === "http" && out.IFLOW_READ_ONLY === undefined) {
-    out.IFLOW_READ_ONLY = "1";
-  }
 
   // Map IFLOW_MCP_TOOL_UUIDS to IFLOW_API_POINTS for alias fallback support
   const toolUuids = out.IFLOW_MCP_TOOL_UUIDS ?? out.IFLOW_API_POINTS;
@@ -17,6 +14,18 @@ export function applyTransportDefaults(env: NodeJS.ProcessEnv): NodeJS.ProcessEn
   const pointsRaw = (out.IFLOW_API_POINTS ?? "").trim();
   if (uuidRaw && !pointsRaw) {
     out.IFLOW_API_POINTS = "{}";
+  }
+
+  // When IFLOW_ALLOWED_HOSTS is omitted, default to the hostname of IFLOW_BASE_URL (single-host dev / broker).
+  const baseUrl = (out.IFLOW_BASE_URL ?? "").trim();
+  const hostsRaw = (out.IFLOW_ALLOWED_HOSTS ?? "").trim();
+  if (baseUrl && !hostsRaw) {
+    try {
+      const host = new URL(baseUrl).hostname;
+      if (host) out.IFLOW_ALLOWED_HOSTS = host;
+    } catch {
+      /* invalid URL — IFLOW_BASE_URL schema will surface the error */
+    }
   }
   return out;
 }
