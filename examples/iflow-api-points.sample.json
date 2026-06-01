@@ -35,6 +35,10 @@
   "analyze_workflow_efficiency": "00000000-0000-4000-8000-00000000001c",
   "analyze_customer_health": "00000000-0000-4000-8000-00000000001d",
   "analyze_correction_costs": "00000000-0000-4000-8000-00000000001e",
+  "analyze_fraud_signals": "00000000-0000-4000-8000-0000000000f0",
+  "analyze_stock_risk_signals": "00000000-0000-4000-8000-0000000000f1",
+  "mcp_operational_risk_sweep": "00000000-0000-4000-8000-0000000000f2",
+  "mcp_operational_risk_detail": "00000000-0000-4000-8000-0000000000f3",
   "diff_diagnose_metric": "00000000-0000-4000-8000-00000000001f",
   "diff_diagnose_events": "00000000-0000-4000-8000-000000000020"
 }

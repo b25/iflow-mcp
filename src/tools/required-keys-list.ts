@@ -61,6 +61,10 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "mcp_data_dictionary",
   "mcp_clarify",
   "mcp_plan",
+  "analyze_fraud_signals",
+  "analyze_stock_risk_signals",
+  "mcp_operational_risk_sweep",
+  "mcp_operational_risk_detail",
   // Phase 2 reports (registered by ./reports/index.ts)
   "report_sales",
   "report_profit",
@@ -74,12 +78,16 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "accounting_invoices_issued",
   "accounting_stock_balance",
   "accounting_intrastat",
-  // Phase 3.3 writes (registered by ./writes/index.ts)
+  // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
   "update_order_status",
   "mark_order_finished",
   "mark_order_billed",
   "add_client_note",
   "add_offer_comment",
+  "create_client",
+  "create_product",
+  "update_product",
+  "create_administration",
 ] as const;
 
 export type RequiredApiPointKey = (typeof REQUIRED_IFLOW_API_POINT_KEYS)[number];

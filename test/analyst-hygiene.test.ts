@@ -63,6 +63,18 @@ describe("analyst hygiene", () => {
     expect(n.suppressed_count).toBe(0);
     expect(n.baseline_method).toBe("unknown");
     expect(n.methodology_notes).toEqual([]);
+    expect(n.report).toBeUndefined();
+  });
+
+  it("normalizeAnalystResult preserves optional report", () => {
+    const n = normalizeAnalystResult(
+      {
+        findings: [],
+        report: { title: "Raport", sections: {} },
+      } as Partial<AnalystResult>,
+      "correction_costs"
+    );
+    expect(n.report).toEqual({ title: "Raport", sections: {} });
   });
 
   it("isSmallSampleFinding respects threshold", () => {

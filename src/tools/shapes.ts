@@ -34,6 +34,8 @@ export interface AnalystResult {
   suppressed_count: number;
   baseline_method: string;
   methodology_notes: string[];
+  /** Optional tabular payload (e.g. analyze_correction_costs). */
+  report?: Record<string, unknown>;
 }
 
 export interface Tool<TIn = any, TOut = any> {

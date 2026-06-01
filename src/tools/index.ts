@@ -48,6 +48,12 @@ import {
   analyzeCustomerHealth,
   analyzeCorrectionCosts,
 } from "./analyst/perspectives.js";
+import {
+  analyzeFraudSignalsTool,
+  analyzeStockRiskSignalsTool,
+  mcpOperationalRiskDetailTool,
+  mcpOperationalRiskSweepTool,
+} from "./analyst/operational-risk.js";
 import { whereAreWeLosingMoneyTool } from "./analyst/orchestrator.js";
 import { listOrdersTool } from "./lookup/list-orders.js";
 import { listOffersTool } from "./lookup/list-offers.js";
@@ -83,6 +89,12 @@ import {
   addClientNoteTool,
   addOfferCommentTool,
 } from "./writes/index.js";
+import {
+  createClientTool,
+  createProductTool,
+  updateProductTool,
+  createAdministrationTool,
+} from "./writes/write-crud.js";
 import {
   mcpAssistantIntroTool,
   mcpDataDictionaryTool,
@@ -135,6 +147,10 @@ export function registerAllTools() {
   registry.register(analyzeWorkflowEfficiency);
   registry.register(analyzeCustomerHealth);
   registry.register(analyzeCorrectionCosts);
+  registry.register(analyzeFraudSignalsTool);
+  registry.register(analyzeStockRiskSignalsTool);
+  registry.register(mcpOperationalRiskSweepTool);
+  registry.register(mcpOperationalRiskDetailTool);
   registry.register(whereAreWeLosingMoneyTool);
   registry.register(listOrdersTool);
   registry.register(listOffersTool);
@@ -166,6 +182,10 @@ export function registerAllTools() {
   registry.register(markOrderBilledTool);
   registry.register(addClientNoteTool);
   registry.register(addOfferCommentTool);
+  registry.register(createClientTool);
+  registry.register(createProductTool);
+  registry.register(updateProductTool);
+  registry.register(createAdministrationTool);
   registry.register(mcpAssistantIntroTool);
   registry.register(mcpDataDictionaryTool);
   registry.register(mcpClarifyTool);

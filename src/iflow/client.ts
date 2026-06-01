@@ -79,7 +79,7 @@ export class IFlowClient {
    */
   async fetch<T = unknown>(
     apiPointKey: string,
-    method: "GET" | "POST" = "GET",
+    method: "GET" | "POST" | "PUT" = "GET",
     body?: unknown,
     options?: IFlowFetchOptions
   ): Promise<T> {
@@ -115,7 +115,7 @@ export class IFlowClient {
       if (options?.confirmToken) {
         headers["X-MCP-Confirm-Token"] = options.confirmToken;
       }
-      if (method === "POST") {
+      if (method === "POST" || method === "PUT") {
         headers["Content-Type"] = "application/json";
         if (options?.idempotencyKey) {
           headers["Idempotency-Key"] = options.idempotencyKey;

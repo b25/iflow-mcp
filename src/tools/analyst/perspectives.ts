@@ -74,6 +74,6 @@ export const analyzeCustomerHealth = createPerspectiveTool(
 
 export const analyzeCorrectionCosts = createPerspectiveTool(
   "analyze_correction_costs",
-  "Analyze costs from errors and corrections.",
+  "Analyze costs from errors and corrections. Returns findings plus structuredContent.report (summary + top orders/clients/storno tables).",
   "analyze_correction_costs"
 );

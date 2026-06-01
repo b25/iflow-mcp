@@ -69,8 +69,15 @@ export function applyAnalystHygiene(
         : `Perspectivă „${result.perspective}” — ${top.length} observații prioritare (max. 5): ` +
           top.map((f) => f.headline).join(" · ");
 
+  const reportHint =
+    result.report && typeof (result.report as { title?: string }).title === "string"
+      ? language === "en"
+        ? " Tabular report: see structuredContent.report (sections + rows)."
+        : " Raport tabelar: vezi structuredContent.report (sectiuni + randuri)."
+      : "";
+
   return {
-    content: [{ type: "text", text: narrative }],
+    content: [{ type: "text", text: narrative + reportHint }],
     structuredContent: result,
   };
 }
@@ -79,7 +86,7 @@ export function normalizeAnalystResult(
   partial: Partial<AnalystResult>,
   perspectiveFallback: string
 ): AnalystResult {
-  return {
+  const base: AnalystResult = {
     perspective: partial.perspective ?? perspectiveFallback,
     findings: Array.isArray(partial.findings) ? partial.findings : [],
     suppressed_count: partial.suppressed_count ?? 0,
@@ -88,4 +95,8 @@ export function normalizeAnalystResult(
       ? [...partial.methodology_notes]
       : [],
   };
+  if (partial.report != null && typeof partial.report === "object") {
+    return { ...base, report: partial.report as Record<string, unknown> };
+  }
+  return base;
 }
