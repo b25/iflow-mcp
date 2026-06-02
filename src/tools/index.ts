@@ -53,6 +53,7 @@ import {
   analyzeStockRiskSignalsTool,
   mcpOperationalRiskDetailTool,
   mcpOperationalRiskSweepTool,
+  mcpAlertsTool,
 } from "./analyst/operational-risk.js";
 import { whereAreWeLosingMoneyTool } from "./analyst/orchestrator.js";
 import { listOrdersTool } from "./lookup/list-orders.js";
@@ -152,6 +153,7 @@ export function registerAllTools() {
   registry.register(analyzeFraudSignalsTool);
   registry.register(analyzeStockRiskSignalsTool);
   registry.register(mcpOperationalRiskSweepTool);
+  registry.register(mcpAlertsTool);
   registry.register(mcpOperationalRiskDetailTool);
   registry.register(whereAreWeLosingMoneyTool);
   registry.register(listOrdersTool);

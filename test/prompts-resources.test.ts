@@ -10,13 +10,14 @@ describe("MCP Prompts & Resources", () => {
     const response = await handler({
       method: "prompts/list",
     });
-    expect(response.prompts).toHaveLength(3);
+    expect(response.prompts).toHaveLength(4);
     expect(response.prompts[0]).toMatchObject({
       name: "new-order",
       description: "Guided order creation for a client",
     });
     expect(response.prompts[1].name).toBe("daily-report");
     expect(response.prompts[2].name).toBe("find-problems");
+    expect(response.prompts[3].name).toBe("iflows");
   });
 
   it("Fetches specific prompts with arguments", async () => {
@@ -41,6 +42,12 @@ describe("MCP Prompts & Resources", () => {
       params: { name: "find-problems" },
     });
     expect(responseFindProblems.messages[0].content.text).toContain("losing money");
+
+    const responseIflows = await handler({
+      method: "prompts/get",
+      params: { name: "iflows" },
+    });
+    expect(responseIflows.messages[0].content.text).toContain("mcp_tool_catalog");
   });
 
   it("Lists available resources and templates", async () => {

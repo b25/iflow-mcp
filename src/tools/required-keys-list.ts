@@ -64,6 +64,7 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "analyze_fraud_signals",
   "analyze_stock_risk_signals",
   "mcp_operational_risk_sweep",
+  "mcp_alerts",
   "mcp_operational_risk_detail",
   // Phase 2 reports (registered by ./reports/index.ts)
   "report_sales",

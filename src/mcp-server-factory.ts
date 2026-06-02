@@ -94,6 +94,17 @@ export function createConfiguredMcpServer(): Server {
           description: "Identify operational and financial leakage points",
           arguments: [],
         },
+        {
+          name: "iflows",
+          description: "Grouped iFlow tool overview + guided next step",
+          arguments: [
+            {
+              name: "language",
+              description: "ro or en (default ro)",
+              required: false,
+            },
+          ],
+        },
       ],
     };
   });
@@ -139,6 +150,21 @@ export function createConfiguredMcpServer(): Server {
             content: {
               type: "text",
               text: "Analyze the ERP data to identify where we are losing money or experiencing bottlenecks. Please use where_are_we_losing_money and order_delay_diagnosis tools to perform a deep operation assessment.",
+            },
+          },
+        ],
+      };
+    }
+    if (name === "iflows") {
+      const lang = args?.language ?? "ro";
+      return {
+        description: "Grouped iFlow tool overview + guided next step",
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Call mcp_tool_catalog with format='grouped' and language='${lang}'. Present the six groups (Business Operations, Partners & Communications, Analytics & Reports, Analysis & Diagnostics, Meta & Discovery, Write Actions) with their counts and a one-line description each. Then ask what the user wants to do. For any write (add_client_note, add_offer_comment, update_order_status, mark_order_finished, mark_order_billed), first run the tool's prerequisite discovery (list/search) to resolve ids — never invent ids.`,
             },
           },
         ],

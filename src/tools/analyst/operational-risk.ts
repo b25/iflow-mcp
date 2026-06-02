@@ -64,6 +64,45 @@ export const analyzeStockRiskSignalsTool: Tool = {
   },
 };
 
+export const mcpAlertsTool: Tool = {
+  name: "mcp_alerts",
+  description:
+    "Business-wide alert triage: severity-ranked issues across finance, receivables, procurement, stock, orders, sales. Each row's drill_down.tool is the most specific tool to investigate it. Filter by severity (high|medium|low) or domain.",
+  inputSchema: z.object({
+    severity: z.enum(["high", "medium", "low"]).optional(),
+    domain: z
+      .enum(["finance", "receivables", "procurement", "stock", "orders", "sales"])
+      .optional(),
+    limit: z.number().int().positive().max(100).optional(),
+    from: z.string().optional(),
+    to: z.string().optional(),
+    language: z.enum(["ro", "en"]).optional(),
+    min_amount: z.union([z.string(), z.number()]).optional(),
+  }),
+  execute: async (args): Promise<MCPToolResult> => {
+    const query: Record<string, string | number> = {};
+    for (const [k, v] of Object.entries(args)) {
+      if (v !== undefined && v !== null) query[k] = v as string | number;
+    }
+    const result = await iflowClient.fetch<{ alerts?: unknown[]; counts_by_severity?: unknown }>(
+      "mcp_alerts",
+      "GET",
+      undefined,
+      { query: Object.keys(query).length ? query : undefined }
+    );
+    const n = Array.isArray(result.alerts) ? result.alerts.length : 0;
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${n} alert(s).`,
+        },
+      ],
+      structuredContent: result,
+    };
+  },
+};
+
 export const mcpOperationalRiskSweepTool: Tool = {
   name: "mcp_operational_risk_sweep",
   description:
