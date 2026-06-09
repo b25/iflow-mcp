@@ -4,10 +4,10 @@ import { parseConfirmArgs } from "../src/cli/confirm.js";
 describe("parseConfirmArgs", () => {
   it("parses --key and --token", () => {
     expect(
-      parseConfirmArgs(["--key", "list_clients", "--token", "abc-1234567890123"])
+      parseConfirmArgs(["--key", "list_clients", "--token", "dummy-token-placeholder"])
     ).toEqual({
       key: "list_clients",
-      token: "abc-1234567890123",
+      token: "dummy-token-placeholder",
     });
   });
 

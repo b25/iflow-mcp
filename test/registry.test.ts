@@ -57,7 +57,7 @@ describe("tool registry", () => {
               quantity: 1,
             },
           ],
-          idempotency_key: "test-key-12345678",
+          idempotency_key: "dummy-idem-placeholder",
         })
       )
     ).rejects.toThrow(McpError);
