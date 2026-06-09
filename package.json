@@ -1,6 +1,6 @@
 {
   "name": "iflow-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "iflow MCP server for Claude, OpenAI, and Gemini",
   "type": "module",
   "main": "dist/index.js",
@@ -15,8 +15,7 @@
     "examples",
     "docs",
     "ops",
-    "scripts/mcp-contract-check.mjs",
-    "ROTATION.md"
+    "scripts/mcp-contract-check.mjs"
   ],
   "engines": {
     "node": ">=20.0.0"

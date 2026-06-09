@@ -34,7 +34,7 @@ Set **`IFLOW_MCP_TRANSPORT=http`** to serve MCP over SSE instead of **stdio** (t
 
 **SSE sessions:** each **`GET /sse`** connection creates an isolated MCP server instance. The SSE endpoint returns a URL for **`POST /messages`** that includes a **`sessionId`** query parameter; clients must post JSON-RPC to that URL (same Bearer token) so messages reach the correct session.
 
-**`GET /sse`** and **`POST /messages`** require a Bearer token and JWT verification (desktop-style MCP over SSE). **`POST /`** accepts the same auth and serves **stateless JSON-RPC** `tools/list` and `tools/call` for the Django BFF (`iflow01` `mcp_broker.py` posting to `IFLOW_MCP_BASE_URL` without opening an SSE session). Sample proxy and Compose files: [`ops/nginx.conf.sample`](ops/nginx.conf.sample), [`ops/compose.sample.yml`](ops/compose.sample.yml). See [`.plans/phase-b-remote-mcp.md`](.plans/phase-b-remote-mcp.md).
+**`GET /sse`** and **`POST /messages`** require a Bearer token and JWT verification (desktop-style MCP over SSE). **`POST /`** accepts the same auth and serves **stateless JSON-RPC** `tools/list` and `tools/call` for the Django BFF (`iflow01` `mcp_broker.py` posting to `IFLOW_MCP_BASE_URL` without opening an SSE session). Sample proxy and Compose files: [`ops/nginx.conf.sample`](ops/nginx.conf.sample), [`ops/compose.sample.yml`](ops/compose.sample.yml).
 
 **Optional tool-name contract check** (after `npm run build`): `IFLOW01_ROOT=/path/to/iflow01 npm run check:mcp-contract` ensures every Django MCP registry key is implemented in TS (extra TS-only tools such as `health` are allowed). Keys are read from `myintranet/scripts/dump_mcp_builtin_registry_keys.py` in the Django tree when present (no Django install); otherwise the script falls back to `get_merged_registry()`. Django logical endpoints `diff_diagnose_metric` / `diff_diagnose_events` are accepted when the composite TS tool `diff_diagnose` is registered. GitHub Actions on the Django repo runs this against `b25/iflow-mcp` (override with repository variable `IFLOW_MCP_CONTRACT_REPO`).
 
@@ -124,36 +124,9 @@ Add to your `claude_desktop_config.json`:
 #### Cursor / Gemini / ChatGPT
 Use the provided examples in the `examples/` directory for your specific client (including [`examples/chatgpt-desktop-config.json`](examples/chatgpt-desktop-config.json) for ChatGPT Desktop).
 
-## Tools (Phase A registry)
+## Tools
 
-Lookup / operations (each needs a matching UUID in `IFLOW_API_POINTS` — see `examples/iflow-api-points.sample.json`):
-
-- Clients: `list_clients`, `get_client`
-- Products: `list_products`, `get_product`, `get_stock`
-- Orders: `count_orders_in_progress`, `list_orders_to_invoice`, `oldest_unfinished_order`, `create_order` (POST; needs `IFLOW_READ_ONLY=0`)
-- Finance: `vat_estimate`, `supplier_payments_due`, `top_products_by_margin`
-- Partners / AR: `list_partners`, `list_overdue_customers`
-- Offers: `latest_offer_for_client`
-- Ops: `lost_offers_breakdown`, `top_agents`, `procurement_today`, `orders_by_stage`, `order_delay_diagnosis`, `list_work_flows`, `list_flow_stages`, `list_user_departments`, `orders_flow_stage_report`, `order_processing_history`, `hours_worked_per_employee`, `daily_activity_summary`, `cashflow_summary`
-- Analyst (requires backend endpoints): `analyze_*` (including `analyze_fraud_signals`, `analyze_stock_risk_signals`), **`mcp_operational_risk_sweep`** + **`mcp_operational_risk_detail`** (aggregate risk scan then per-`problem_id` rows), `where_are_we_losing_money`, `diff_diagnose` — **statistical hygiene** (samples with n under 10 down-ranked, narrative max 5 findings; default Romanian text, optional input `language: en`); see [`.plans/product-scenarios.md`](.plans/product-scenarios.md) section D5.
-- **Virtual assistant flow (Phase 4):** four meta tools that turn the MCP into a guided assistant. Recommended order when starting a new chat:
-  1. `mcp_assistant_intro` — business overview + topics + top user questions (topics include **orders**, **offers**, **clients**, **products**, **finance**, **workflow**, **diagnose**, and **risk** for operational integrity / fraud heuristics / stock risk). Call this first when the user asks "what can you do?" or starts vague.
-  2. `mcp_data_dictionary` — entity/field/enum descriptions per topic; use it to discover what filters exist before constructing a query.
-  3. `mcp_clarify` — pass the raw user objective; returns structured clarifying questions `{id, prompt, type, options, default}` grouped by topic plus candidate tools.
-  4. `mcp_plan` — pass `objective` + `answers` (dict keyed by clarification id); returns an executable ordered plan of `{tool, args, why}` steps that the agent runs in sequence.
-- **Parameterized listings (Phase 1.2):** `list_orders`, `list_offers`, `list_invoices`, `list_suppliers`, `list_products_search`, `list_clients_search`, `list_purchases`, `list_stock_movements`, `list_activity`, `list_notes`, `list_comments` — all accept `from/to`, entity filters, `q`, `limit`, `offset` and return `{results, count, next_offset, filters}`. Example: *"show last 20 unfinished orders"* → `list_orders({finished:false, limit:20, order_by:"date_order_desc"})`.
-- **Discovery (Phase 1.3):** `mcp_tool_catalog` (filter by `category`/`q`) and `mcp_query_assist` (natural-language objective → recommended tools + suggested args).
-- **Reports (Phase 2):** `report_sales`, `report_profit`, `report_total_sales`, `report_quantity`, `report_employee`, `report_equipments_gantt`, `report_stock_purchases`, `report_dashboard_card`, `accounting_partner_balance`, `accounting_invoices_issued`, `accounting_stock_balance`, `accounting_intrastat` — backed by reusable aggregations in `services/reports_query.py` (shared with Django UI).
-- **Writes (Phase 3.3, `requires_confirmation=true`, disabled when `IFLOW_READ_ONLY=1`):** `update_order_status`, `mark_order_finished`, `mark_order_billed`, `add_client_note`, `add_offer_comment` — all log a `ReportsRecentActivity` audit row. Pass `confirm: true` to send the `X-MCP-Confirm-Token` header.
-- `health` — configured keys + read-only flag (no secrets)
-- `iflow_playbook_index` — lists scenario tools (`product_scenarios_phase0`, `scenariul_1`, `scenariul_2`, `health`) and `.plans/` doc paths (no network)
-- `product_scenarios_phase0` — maps the [35 Phase 0 questions](.plans/product-scenarios.md) (section B1) to registered MCP tools (no network; for coverage tracking)
-- `scenariul_1` — [Scenario 1](.plans/Scenariul_1.txt) „Unde pierdem bani?”: `action=playbook` returns the 8 perspectives + endpoint design notes; `analyze_all` runs `where_are_we_losing_money`; `analyze_perspective=1..8` runs the matching `analyze_*` tool (needs Api Points + scopes)
-- `scenariul_2` — [Scenario 2](.plans/Scenariul_2.txt) „De ce nu mai merge ca înainte?”: `action=playbook` returns baseline methods, monitoring dimensions, causal categories (A–F), narrative rules, K4 endpoint notes; `action=diagnose` forwards to `diff_diagnose` (`metric`, optional `entity_id`, `interval`, `baseline`)
-
-### Django api-external: `IFLOW_MCP` aggregate points (work03)
-
-For tools that are not plain **Clients / Products / Orders** list endpoints, the iFlow backend can expose **`GET /api-external/v1/<uuid>/`** via Api Point type **iflow MCP** (`IFLOW_MCP`): set **Endpoint MCP iflow** to the same logical key as in `IFLOW_API_POINTS` (e.g. `vat_estimate`, `diff_diagnose_metric`). Plain CRUD-style points stay on types **Clienti**, **Produse**, **Comenzi** as before.
+The MCP server exposes its tool registry over the standard `tools/list` MCP method — each tool advertises its JSON Schema, description, and required scopes there. Inspect the live list with the MCP Inspector (`npm run dev:inspect`) or any connected client.
 
 ### Local HTTP (dev only)
 
@@ -162,7 +135,7 @@ For tools that are not plain **Clients / Products / Orders** list endpoints, the
 ## Security
 
 - **HTTP transport** binds to loopback by default; terminate TLS at your reverse proxy. Prefer **IP allowlists / rate limits** at the proxy ([`ops/nginx.conf.sample`](ops/nginx.conf.sample)).
-- **OAuth scopes (remote HTTP)** — when JWT verification is enabled, each tool requires scopes per [`.plans/architecture.md`](.plans/architecture.md) section C2: e.g. `tools:erp:read` for most lookups, `tools:orders:write` for `create_order`, `tools:analytics:read` for analyst tools; `health` only needs a valid token. **`create_order`** also accepts **single-use** `tools:orders:write:elevated` together with a JWT **`jti`** (consumed once in-process; use Redis in production per Phase C). Scopes are read from the `scope` or `scp` claim (space-separated or array). **stdio** sessions do not set this context and are not scope-gated (process trust).
+- **OAuth scopes (remote HTTP)** — when JWT verification is enabled, each tool requires scopes (e.g. `tools:erp:read` for most lookups, `tools:orders:write` for `create_order`, `tools:analytics:read` for analyst tools); `health` only needs a valid token. **`create_order`** also accepts **single-use** `tools:orders:write:elevated` together with a JWT **`jti`** (consumed once in-process; use Redis in production per Phase C). Scopes are read from the `scope` or `scp` claim (space-separated or array). **stdio** sessions do not set this context and are not scope-gated (process trust).
 - **Analyst narrative language** — `analyze_*`, `diff_diagnose`, and `where_are_we_losing_money` accept optional tool input `language`: `ro` (default) or `en`.
 - **Request correlation (HTTP)** — tool completion logs include `requestId` when running inside the remote transport (matches response `X-Request-Id`).
 - **HTTPS** for `IFLOW_BASE_URL` by default; **`IFLOW_ALLOW_INSECURE_HTTP=1`** opts into `http://` for local dev only
@@ -172,8 +145,6 @@ For tools that are not plain **Clients / Products / Orders** list endpoints, the
 - **Read-only mode** via `IFLOW_READ_ONLY=1` (disables `create_order`)
 - **Idempotency-Key** header on `create_order`
 - **API errors**: non-2xx responses become `IFlowHttpError` with status + body; when the backend sends K1.3-style `{ code, message }`, MCP error codes map accordingly (`NOT_FOUND` → invalid request, etc.)
-
-See [`.plans/phase-a-desktop-mcp.md`](.plans/phase-a-desktop-mcp.md) and [`ROTATION.md`](ROTATION.md).
 
 ## Docs
 

@@ -10,7 +10,7 @@ Use the **same** stdio MCP server as Claude Desktop / Claude Code:
 
 - Name tools explicitly in the task (“call `list_clients` then …”) so the planner reaches the right Api Points.
 - Large lists: avoid `all_pages: true` unless needed; defaults respect `IFLOW_MAX_PAGES_PER_CALL`.
-- After **bearer rotation**, restart the MCP process — see [`ROTATION.md`](../ROTATION.md).
+- After **bearer rotation**, restart the MCP process.
 
 ## Local files + ERP
 
