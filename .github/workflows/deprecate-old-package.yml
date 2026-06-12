@@ -18,6 +18,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Deprecate iflow-mcp on npm
-        run: npm deprecate iflow-mcp@"*" "Renamed: this package moved to iflows-mcp. Install iflows-mcp instead."
+        run: >-
+          npm deprecate iflow-mcp@"*"
+          "Renamed: this package moved to iflows-mcp. Install iflows-mcp instead."
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
