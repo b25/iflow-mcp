@@ -2,7 +2,7 @@
   "mcpServers": {
     "iflow": {
       "command": "node",
-      "args": ["/absolute/path/to/iflow-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/iflows-mcp/dist/index.js"],
       "env": {
         "IFLOW_BASE_URL": "https://erp.example.com",
         "IFLOW_ALLOWED_HOSTS": "erp.example.com",

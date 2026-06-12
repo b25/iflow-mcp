@@ -2,7 +2,7 @@
   "mcpServers": {
     "iflow-local": {
       "command": "node",
-      "args": ["/absolute/path/to/iflow-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/iflows-mcp/dist/index.js"],
       "env": {
         "IFLOW_BASE_URL": "http://localhost:57882",
         "IFLOW_ALLOW_INSECURE_HTTP": "1",

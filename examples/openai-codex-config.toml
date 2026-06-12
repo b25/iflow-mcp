@@ -4,7 +4,7 @@
 
 [mcp.servers.iflow]
 command = "node"
-args = ["/absolute/path/to/iflow-mcp/dist/index.js"]
+args = ["/absolute/path/to/iflows-mcp/dist/index.js"]
 
 [mcp.servers.iflow.env]
 IFLOW_BASE_URL = "https://erp.example.com"

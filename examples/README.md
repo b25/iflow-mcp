@@ -2,7 +2,7 @@
 
 CI runs `npm run validate:examples` to ensure every `*.json` file here parses.
 
-**Prompt pentru configurare (Cursor, Claude, ChatGPT):** textul copy-paste este în [README](../README.md) la *Client integration* → *Assistant prompt (copy-paste)* (fenced ca la JSON, etichetă `text`). Include acum și **regulile după conectare**: MCP ca sursă de adevăr, flux `mcp_assistant_intro` → `mcp_clarify` → `mcp_plan`, plus referința la `.cursor/rules/iflow-mcp-aggressive-priority.mdc`. Pentru același text și tabelul „unde salvez”: [`configure-iflow-mcp-prompt.md`](./configure-iflow-mcp-prompt.md).
+**Prompt pentru configurare (Cursor, Claude, ChatGPT):** textul copy-paste este în [README](../README.md) la *Client integration* → *Assistant prompt (copy-paste)* (fenced ca la JSON, etichetă `text`). Include acum și **regulile după conectare**: MCP ca sursă de adevăr, flux `mcp_assistant_intro` → `mcp_clarify` → `mcp_plan`, plus referința la `.cursor/rules/iflows-mcp-aggressive-priority.mdc`. Pentru același text și tabelul „unde salvez”: [`configure-iflows-mcp-prompt.md`](./configure-iflows-mcp-prompt.md).
 
 - [`iflow-api-points.sample.json`](./iflow-api-points.sample.json) — template for **`IFLOW_API_POINTS`**: one UUID per registered tool key. Replace every value with the real `path_uuid` from iflow **Api Points** admin.
 - [`claude-desktop-config.json`](./claude-desktop-config.json) — `mcpServers` snippet.

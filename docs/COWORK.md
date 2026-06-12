@@ -3,7 +3,7 @@
 Use the **same** stdio MCP server as Claude Desktop / Claude Code:
 
 1. Build: `npm run build`
-2. Register the server in your Cowork / Claude project MCP settings with `node /absolute/path/to/iflow-mcp/dist/index.js` and the same `IFLOW_*` env vars as in [`.env.example`](../.env.example).
+2. Register the server in your Cowork / Claude project MCP settings with `node /absolute/path/to/iflows-mcp/dist/index.js` and the same `IFLOW_*` env vars as in [`.env.example`](../.env.example).
 3. Prefer **read-only** exploration first (`IFLOW_READ_ONLY=1`) until flows are trusted.
 
 ## Multi-step automation tips
