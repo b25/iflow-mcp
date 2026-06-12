@@ -1,4 +1,4 @@
-# Prompt: configurează Cursor / Claude / ChatGPT să folosească iflow-mcp
+# Prompt: configurează Cursor / Claude / ChatGPT să folosească iflows-mcp
 
 Textul de mai jos este **în sync** cu [README principal](../README.md), secțiunea **Client integration** → **Assistant prompt (copy-paste)**. Include atât configurarea MCP, cât și **comportamentul după conectare** (MCP prioritar, flux assistant, Cursor Rules). Poți copia de aici sau din README.
 
@@ -9,10 +9,10 @@ Copiază blocul într-un chat **Cursor**, **Claude**, **ChatGPT** (sau alt asist
 ## Prompt (copy-paste)
 
 ```text
-Ești un asistent care mă ajută să conectez serverul MCP **iflow-mcp** (iFlow ERP) la editorul meu sau la Claude Desktop.
+Ești un asistent care mă ajută să conectez serverul MCP **iflows-mcp** (iFlow ERP) la editorul meu sau la Claude Desktop.
 
 Context tehnic:
-- iflow-mcp este un server Node (>=20); binarul rulează cu `node <cale>/dist/index.js` sau comanda `iflow-mcp` după `npm run build`.
+- iflows-mcp este un server Node (>=20); binarul rulează cu `node <cale>/dist/index.js` sau comanda `iflows-mcp` după `npm run build`.
 - Variabilele obligatorii sunt documentate în `iflow-mcp/.env.example`.
 - Maparea tool → UUID în Django: fie **Api Points** de tip IFLOW_MCP cu cheia logică egală cu cheia din JSON, fie câmpul `IFLOW_API_POINTS` (JSON) care mapează fiecare cheie la `path_uuid`-ul din Api Point. Șablon: `iflow-mcp/examples/iflow-api-points.sample.json`.
 

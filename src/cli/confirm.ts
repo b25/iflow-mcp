@@ -35,7 +35,7 @@ export function parseConfirmArgs(argv: string[]): { key: string; token: string }
   }
   if (!key.trim()) {
     throw new Error(
-      "Usage: iflow-mcp confirm --key <IFLOW_API_POINTS logical key> [--token <confirm_token>] or set IFLOW_CONFIRM_TOKEN"
+      "Usage: iflows-mcp confirm --key <IFLOW_API_POINTS logical key> [--token <confirm_token>] or set IFLOW_CONFIRM_TOKEN"
     );
   }
   if (!token.trim()) {

@@ -15,7 +15,7 @@ describe("meta / CLI", () => {
   });
 
   it("handleCliArgs returns true for --version", () => {
-    expect(handleCliArgs(["node", "iflow-mcp", "--version"])).toBe(true);
+    expect(handleCliArgs(["node", "iflows-mcp", "--version"])).toBe(true);
   });
 
   it("dist entry --version matches package.json (requires npm run build)", () => {

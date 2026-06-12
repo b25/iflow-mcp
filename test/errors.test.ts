@@ -43,7 +43,7 @@ describe("mapIFlowError", () => {
     const m = mapIFlowError(err);
     expect(m.code).toBe(ErrorCode.InvalidRequest);
     expect(String(m.message)).toContain("Operator approval");
-    expect(String(m.message)).toContain("iflow-mcp confirm");
+    expect(String(m.message)).toContain("iflows-mcp confirm");
   });
 
   it("maps invalid_mcp_confirm_token to InvalidRequest", () => {

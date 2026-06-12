@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Cross-repo check: every Django MCP registry key must exist in iflow-mcp (TS may define extra tools).
+ * Cross-repo check: every Django MCP registry key must exist in iflows-mcp (TS may define extra tools).
  *
  * Usage (after `npm run build`):
  *   IFLOW01_ROOT=/path/to/iflow01 node scripts/mcp-contract-check.mjs
@@ -9,7 +9,7 @@
  * (no Django install), otherwise from `get_merged_registry()` via `django.setup()`.
  *
  * Exits 0 if skipped or the Django side cannot be read.
- * Exits 1 if any Django key is missing from iflow-mcp.
+ * Exits 1 if any Django key is missing from iflows-mcp.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -130,7 +130,7 @@ async function main() {
   const onlyTs = ts.filter((k) => !django.includes(k));
 
   if (onlyDjango.length) {
-    console.error("MCP tool name drift: Django registry keys missing from iflow-mcp:");
+    console.error("MCP tool name drift: Django registry keys missing from iflows-mcp:");
     console.error(" ", onlyDjango.join(", "));
     process.exit(1);
   }

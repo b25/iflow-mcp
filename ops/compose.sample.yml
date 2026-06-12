@@ -1,12 +1,12 @@
-# Sample Compose stack: build iflow-mcp and expose HTTP (place behind TLS proxy).
+# Sample Compose stack: build iflows-mcp and expose HTTP (place behind TLS proxy).
 # Copy to compose.yml, set env_file, and replace image/build as needed.
 
 services:
-  iflow-mcp:
+  iflows-mcp:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: iflow-mcp:local
+    image: iflows-mcp:local
     restart: unless-stopped
     env_file:
       - ../.env

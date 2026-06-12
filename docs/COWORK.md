@@ -1,4 +1,4 @@
-# Claude Cowork + iflow-mcp
+# Claude Cowork + iflows-mcp
 
 Use the **same** stdio MCP server as Claude Desktop / Claude Code:
 

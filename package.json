@@ -1,11 +1,11 @@
 {
-  "name": "iflow-mcp",
-  "version": "0.1.1",
+  "name": "iflows-mcp",
+  "version": "0.1.2",
   "description": "iflow MCP server for Claude, OpenAI, and Gemini",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "iflow-mcp": "./dist/index.js"
+    "iflows-mcp": "./dist/index.js"
   },
   "files": [
     "dist",

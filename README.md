@@ -1,6 +1,6 @@
-# iflow-mcp
+# iflows-mcp
 
-Model Context Protocol (MCP) server for iFlow ERP.
+Model Context Protocol (MCP) server for iFlow ERP. (Formerly published on npm as `iflow-mcp`.)
 
 ## Quick start (about 10 minutes)
 
@@ -20,13 +20,13 @@ Optional global CLI (after build):
 
 ```bash
 npm link
-# MCP "command" can be: iflow-mcp (stdio; same as node dist/index.js)
+# MCP "command" can be: iflows-mcp (stdio; same as node dist/index.js)
 ```
 
 CLI flags (no `IFLOW_*` env required):
 
-- `iflow-mcp --version` / `-v` — print package version
-- `iflow-mcp --help` / `-h` — short usage
+- `iflows-mcp --version` / `-v` — print package version
+- `iflows-mcp --help` / `-h` — short usage
 
 ### Remote HTTP transport (optional)
 
@@ -59,10 +59,10 @@ The server uses environment variables for configuration.
 #### Assistant prompt (copy-paste)
 
 ```text
-Ești un asistent care mă ajută să conectez serverul MCP **iflow-mcp** (iFlow ERP) la editorul meu sau la Claude Desktop.
+Ești un asistent care mă ajută să conectez serverul MCP **iflows-mcp** (iFlow ERP) la editorul meu sau la Claude Desktop.
 
 Context tehnic:
-- iflow-mcp este un server Node (>=20); binarul rulează cu `node <cale>/dist/index.js` sau comanda `iflow-mcp` după `npm run build`.
+- iflows-mcp este un server Node (>=20); binarul rulează cu `node <cale>/dist/index.js` sau comanda `iflows-mcp` după `npm run build`.
 - Variabilele obligatorii sunt documentate în `iflow-mcp/.env.example`.
 - Maparea tool → UUID în Django: fie **Api Points** de tip IFLOW_MCP cu cheia logică egală cu cheia din JSON, fie câmpul `IFLOW_API_POINTS` (JSON) care mapează fiecare cheie la `path_uuid`-ul din Api Point. Șablon: `iflow-mcp/examples/iflow-api-points.sample.json`.
 
@@ -139,7 +139,7 @@ The MCP server exposes its tool registry over the standard `tools/list` MCP meth
 - **Analyst narrative language** — `analyze_*`, `diff_diagnose`, and `where_are_we_losing_money` accept optional tool input `language`: `ro` (default) or `en`.
 - **Request correlation (HTTP)** — tool completion logs include `requestId` when running inside the remote transport (matches response `X-Request-Id`).
 - **HTTPS** for `IFLOW_BASE_URL` by default; **`IFLOW_ALLOW_INSECURE_HTTP=1`** opts into `http://` for local dev only
-- **PromoArt two-phase confirmation** — if api-external returns **`403`** with **`code: confirmation_required`**, complete the same logical Api Point with **`iflow-mcp confirm --key <IFLOW_API_POINTS key> [--token <confirm_token>]`** (sends `X-MCP-Confirm-Token`). Token也可 provided via **`IFLOW_CONFIRM_TOKEN`** environment variable to avoid CLI argument exposure. MCP tools map that error to a short user message (no token echoed). Error logs redact `details.confirm_token` / `pending_id`.
+- **PromoArt two-phase confirmation** — if api-external returns **`403`** with **`code: confirmation_required`**, complete the same logical Api Point with **`iflows-mcp confirm --key <IFLOW_API_POINTS key> [--token <confirm_token>]`** (sends `X-MCP-Confirm-Token`). Token也可 provided via **`IFLOW_CONFIRM_TOKEN`** environment variable to avoid CLI argument exposure. MCP tools map that error to a short user message (no token echoed). Error logs redact `details.confirm_token` / `pending_id`.
 - **Host allowlist** (`IFLOW_ALLOWED_HOSTS`, optional — defaults to `IFLOW_BASE_URL` hostname) and `redirect: manual` on the HTTP client
 - **Log redaction** for `Authorization` headers (pino)
 - **Read-only mode** via `IFLOW_READ_ONLY=1` (disables `create_order`)

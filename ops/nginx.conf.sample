@@ -1,4 +1,4 @@
-# Sample reverse proxy for iflow-mcp (IFLOW_MCP_TRANSPORT=http).
+# Sample reverse proxy for iflows-mcp (IFLOW_MCP_TRANSPORT=http).
 # Terminate TLS at this nginx; MCP listens on plain HTTP on 127.0.0.1 only.
 
 upstream iflow_mcp {
