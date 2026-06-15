@@ -11,6 +11,8 @@ export type McpAuthStore = {
   traceparent?: string;
   /** W3C Trace Context tracestate header (remote transport only). */
   tracestate?: string;
+  /** Forwarded end-user Django PK (BFF-only path); for write attribution. */
+  actorUserId?: string;
 };
 
 export const mcpAuthContext = new AsyncLocalStorage<McpAuthStore>();

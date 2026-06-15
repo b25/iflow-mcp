@@ -178,6 +178,9 @@ export class IFlowClient {
         if (auth?.tracestate) {
           headers["tracestate"] = auth.tracestate;
         }
+        if (auth?.actorUserId) {
+          headers["X-IFlow-Actor-User-Id"] = auth.actorUserId;
+        }
         if (options?.confirmToken) {
           headers["X-MCP-Confirm-Token"] = options.confirmToken;
         }

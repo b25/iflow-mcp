@@ -25,11 +25,17 @@ function runWithMcpAuth(
   fn: () => Promise<void>
 ): Promise<void> {
   const requestId = (req as Request & { requestId?: string }).requestId;
+  const rawActor = req.headers["x-iflow-actor-user-id"];
+  const actorUserId =
+    typeof rawActor === "string" && /^[0-9]+$/.test(rawActor.trim())
+      ? rawActor.trim()
+      : undefined;
   return mcpAuthContext.run(
     {
       scope: claims.scope,
       jti: typeof claims.jti === "string" ? claims.jti : undefined,
       requestId,
+      actorUserId,
     },
     fn
   );
