@@ -31,10 +31,34 @@ export function requiredScopesForTool(toolName: string): string[] | null {
   if (toolName === "add_offer_comment") {
     return ["tools:offers:write"];
   }
+  // Analytics / financial / accounting READ tools.
+  // Mirrors the Django `myintranet/site/api/mobile/rbac.py` TOOL_RULES capability
+  // gating intent (margin/financials/team-sensitive reports + accounting) at the
+  // coarser external OAuth layer: these stay behind analytics:read rather than
+  // falling through to the broad tools:erp:read default.
   if (
     toolName === "where_are_we_losing_money" ||
     toolName === "diff_diagnose" ||
-    toolName.startsWith("analyze_")
+    toolName.startsWith("analyze_") ||
+    // margin / sales / dashboard reports
+    toolName === "report_profit" ||
+    toolName === "report_sales" ||
+    toolName === "report_total_sales" ||
+    toolName === "report_dashboard_card" ||
+    toolName === "report_quantity" ||
+    toolName === "top_products_by_margin" ||
+    // team-performance reports
+    toolName === "top_agents" ||
+    toolName === "hours_worked_per_employee" ||
+    toolName === "report_employee" ||
+    // accounting / financials
+    toolName === "accounting_intrastat" ||
+    toolName === "accounting_invoices_issued" ||
+    toolName === "accounting_partner_balance" ||
+    toolName === "accounting_stock_balance" ||
+    toolName === "cashflow_summary" ||
+    toolName === "supplier_payments_due" ||
+    toolName === "vat_estimate"
   ) {
     return ["tools:analytics:read"];
   }
