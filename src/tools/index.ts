@@ -86,6 +86,7 @@ import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
 import { listEmailCampaignsTool } from "./lookup/email-campaigns.js";
 import { listCorrespondenceTool } from "./lookup/correspondence.js";
+import { listGeneratedDocumentsTool } from "./lookup/generated_documents.js";
 import {
   listAdminFoldersTool,
   listAdminFilesTool,
@@ -225,6 +226,7 @@ export function registerAllTools() {
   registry.register(listSupplierOrdersTool);
   registry.register(listEmailCampaignsTool);
   registry.register(listCorrespondenceTool);
+  registry.register(listGeneratedDocumentsTool);
   registry.register(listAdminFoldersTool);
   registry.register(listAdminFilesTool);
   registry.register(downloadAdminFileTool);
