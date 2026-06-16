@@ -149,6 +149,7 @@ import {
   markOrderBilledTool,
   addClientNoteTool,
   addOfferCommentTool,
+  sendClientEmailTool,
   createOpportunityTool,
   tagEntityTool,
   createTaskTool,
@@ -305,6 +306,7 @@ export function registerAllTools() {
   registry.register(markOrderBilledTool);
   registry.register(addClientNoteTool);
   registry.register(addOfferCommentTool);
+  registry.register(sendClientEmailTool);
   registry.register(createOpportunityTool);
   registry.register(tagEntityTool);
   registry.register(createTaskTool);

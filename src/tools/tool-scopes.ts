@@ -25,7 +25,7 @@ export function requiredScopesForTool(toolName: string): string[] | null {
   ) {
     return ["tools:orders:write"];
   }
-  if (toolName === "add_client_note") {
+  if (toolName === "add_client_note" || toolName === "send_client_email") {
     return ["tools:clients:write"];
   }
   if (toolName === "add_offer_comment" || toolName === "create_opportunity") {

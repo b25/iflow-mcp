@@ -217,6 +217,75 @@ export const addOfferCommentTool: Tool = {
   },
 };
 
+export const sendClientEmailTool: Tool = {
+  name: "send_client_email",
+  description:
+    "Send an email to a client using the SAME mechanism as the manual UI " +
+    "'send email to client' action: it records an EmailTracking row and a " +
+    "client 'E-mail' activity (visible in document_communications / the " +
+    "client history), and is journaled to the acting user. It does NOT " +
+    "hand-roll SMTP. Required: client_id (resolve via list_clients_search; " +
+    "never invent it), subject, body. The recipient is auto-resolved from the " +
+    "client profile (contact_email + ClientiContactPerson). When the client " +
+    "has MORE THAN ONE email address and you did not pick one, the call fails " +
+    "with error 'recipients_ambiguous' and a recipients_ambiguous list " +
+    "(contact_id, email, name) — ASK the user which address, then re-call with " +
+    "contact_id or recipient_email; never guess. recipient_email must be one " +
+    "of the client's known addresses. ALWAYS confirm before sending. Disabled " +
+    "when IFLOW_READ_ONLY=1. Requires confirmation.",
+  inputSchema: z.object({
+    client_id: z.number().int().positive(),
+    subject: z.string().min(1).max(512),
+    body: z.string().min(1),
+    contact_id: z.number().int().positive().optional(),
+    recipient_email: z.string().email().optional(),
+    confirm: z.boolean().optional(),
+  }),
+  execute: async (args): Promise<MCPToolResult> => {
+    if (config.IFLOW_READ_ONLY) return readOnlyError("send_client_email");
+    const { confirm, ...rest } = args;
+    const result = await iflowClient.fetch<{
+      ok?: boolean;
+      error?: string;
+      message?: string;
+      recipients?: string[];
+      sent_at?: string;
+      recipients_ambiguous?: Array<{
+        contact_id?: number | null;
+        email?: string;
+        name?: string;
+      }>;
+    }>("send_client_email", "GET", undefined, {
+      query: flatten(rest as Record<string, unknown>),
+      confirmToken: confirm ? "mcp_confirm=1" : undefined,
+    });
+    const errored = result.ok === false;
+    let text: string;
+    if (!errored) {
+      const to = (result.recipients ?? []).join(", ");
+      text = `Email sent to ${to || "client"} (client ${args.client_id}).`;
+    } else if (result.error === "recipients_ambiguous") {
+      const list = (result.recipients_ambiguous ?? [])
+        .map(
+          (c) =>
+            `${c.email ?? "?"}${c.name ? ` (${c.name})` : ""}` +
+            (c.contact_id != null ? ` [contact_id=${c.contact_id}]` : "")
+        )
+        .join(", ");
+      text =
+        `Multiple email addresses on file; ask which one and re-call with ` +
+        `contact_id or recipient_email. Candidates: ${list}.`;
+    } else {
+      text = `Failed: ${result.message ?? result.error ?? "unknown"}.`;
+    }
+    return {
+      content: [{ type: "text", text }],
+      structuredContent: result as Record<string, unknown>,
+      isError: errored,
+    };
+  },
+};
+
 const opportunityLine = z
   .object({
     produs_id: z.number().int().positive(),
