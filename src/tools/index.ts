@@ -82,6 +82,7 @@ import { listEmployeeLeaveTool } from "./lookup/employee-leave.js";
 import { listClientDiscountsTool } from "./lookup/client-discounts.js";
 import { listClientServiceEquipmentTool } from "./lookup/client-service-equipment.js";
 import { clientCreditLimitHistoryTool } from "./lookup/client-credit-limit-history.js";
+import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
 import { listPurchasesTool } from "./lookup/list-purchases.js";
 import { listStockMovementsTool } from "./lookup/list-stock-movements.js";
@@ -207,6 +208,7 @@ export function registerAllTools() {
   registry.register(listClientDiscountsTool);
   registry.register(listClientServiceEquipmentTool);
   registry.register(clientCreditLimitHistoryTool);
+  registry.register(clientPortalAccountTool);
   registry.register(listSupplierOrdersTool);
   registry.register(listPurchasesTool);
   registry.register(listStockMovementsTool);
