@@ -113,6 +113,10 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_supplier_orders",
   "list_email_campaigns",
   "list_correspondence",
+  // Administrative documents (CloudFolder / CloudFile)
+  "list_admin_folders",
+  "list_admin_files",
+  "download_admin_file",
   "list_email_flows",
   "get_email_flow",
   // Marketing forms (FormTemplate / FormSubmittedData)
