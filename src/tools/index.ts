@@ -47,7 +47,22 @@ import {
   analyzeWorkflowEfficiency,
   analyzeCustomerHealth,
   analyzeCorrectionCosts,
+  analyzeCashConversionCycle,
+  analyzeCohortRetention,
+  analyzeCustomerClv,
+  analyzeCustomerCreditRisk,
+  analyzeCustomerProfitability,
+  analyzeCustomerRfm,
+  analyzeDeadStock,
+  analyzeInventoryAbc,
+  analyzeInventoryOptimization,
+  analyzeInventoryXyz,
+  analyzeMarginBridge,
+  analyzePayables,
+  analyzeReceivablesAging,
+  analyzeRevenueConcentration,
 } from "./analyst/perspectives.js";
+import { analyzeBusinessBoard, analyzeBusinessHealth } from "./analyst/boards.js";
 import {
   analyzeFraudSignalsTool,
   analyzeStockRiskSignalsTool,
@@ -151,6 +166,22 @@ export function registerAllTools() {
   registry.register(analyzeWorkflowEfficiency);
   registry.register(analyzeCustomerHealth);
   registry.register(analyzeCorrectionCosts);
+  registry.register(analyzeCashConversionCycle);
+  registry.register(analyzeCohortRetention);
+  registry.register(analyzeCustomerClv);
+  registry.register(analyzeCustomerCreditRisk);
+  registry.register(analyzeCustomerProfitability);
+  registry.register(analyzeCustomerRfm);
+  registry.register(analyzeDeadStock);
+  registry.register(analyzeInventoryAbc);
+  registry.register(analyzeInventoryOptimization);
+  registry.register(analyzeInventoryXyz);
+  registry.register(analyzeMarginBridge);
+  registry.register(analyzePayables);
+  registry.register(analyzeReceivablesAging);
+  registry.register(analyzeRevenueConcentration);
+  registry.register(analyzeBusinessBoard);
+  registry.register(analyzeBusinessHealth);
   registry.register(analyzeFraudSignalsTool);
   registry.register(analyzeStockRiskSignalsTool);
   registry.register(mcpOperationalRiskSweepTool);
