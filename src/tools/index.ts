@@ -75,6 +75,8 @@ import { listOrdersTool } from "./lookup/list-orders.js";
 import { listOffersTool } from "./lookup/list-offers.js";
 import { listInvoicesTool } from "./lookup/list-invoices.js";
 import { listReceiptsTool } from "./lookup/list-receipts.js";
+import { listCashRegisterTool } from "./lookup/list-cash-register.js";
+import { listBankRegisterTool } from "./lookup/list-bank-register.js";
 import { listSuppliersTool } from "./lookup/list-suppliers.js";
 import { listProductsSearchTool } from "./lookup/list-products-search.js";
 import { listClientsSearchTool } from "./lookup/list-clients-search.js";
@@ -229,6 +231,8 @@ export function registerAllTools() {
   registry.register(listOffersTool);
   registry.register(listInvoicesTool);
   registry.register(listReceiptsTool);
+  registry.register(listCashRegisterTool);
+  registry.register(listBankRegisterTool);
   registry.register(listSuppliersTool);
   registry.register(listProductsSearchTool);
   registry.register(listClientsSearchTool);

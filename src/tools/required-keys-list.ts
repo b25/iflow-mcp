@@ -31,6 +31,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "hours_worked_per_employee",
   "daily_activity_summary",
   "cashflow_summary",
+  "list_cash_register",
+  "list_bank_register",
   "analyze_execution_loss",
   "analyze_sales_funnel",
   "analyze_receivables_risk",
