@@ -120,6 +120,9 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_offer_versions",
   // client portal login account (email/username, last login, login history)
   "get_client_portal_account",
+  // internal users / employees (role, access level, department)
+  "list_users",
+  "get_user",
   // supplier purchase orders
   "list_supplier_orders",
   // recurring documents (recurrence configs on Orders)
