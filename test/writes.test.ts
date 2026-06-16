@@ -118,3 +118,55 @@ describe("phase 3.3 write tools — IFLOW_READ_ONLY enforcement", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("add_client_note — notify_employee_ids forwarding", () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+  let originalReadOnly: boolean;
+
+  beforeAll(() => {
+    originalReadOnly = config.IFLOW_READ_ONLY;
+    fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => {
+      return new Response(JSON.stringify({ ok: true, note_id: 99 }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    });
+    (config as { IFLOW_READ_ONLY: boolean }).IFLOW_READ_ONLY = false;
+  });
+
+  afterAll(() => {
+    (config as { IFLOW_READ_ONLY: boolean }).IFLOW_READ_ONLY = originalReadOnly;
+    fetchSpy.mockRestore();
+  });
+
+  beforeEach(() => {
+    registry.clear();
+    registerAllTools();
+    fetchSpy.mockClear();
+  });
+
+  it("joins notify_employee_ids array to comma string in query", async () => {
+    await mcpAuthContext.run({ scope: "tools:clients:write" }, async () => {
+      await registry.executeTool("add_client_note", {
+        client_id: 1,
+        subject: "x",
+        notify_employee_ids: [4, 7],
+      });
+    });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const calledUrl = new URL(fetchSpy.mock.calls[0][0] as string);
+    expect(calledUrl.searchParams.get("notify_employee_ids")).toBe("4,7");
+  });
+
+  it("omits notify_employee_ids from query when not provided", async () => {
+    await mcpAuthContext.run({ scope: "tools:clients:write" }, async () => {
+      await registry.executeTool("add_client_note", {
+        client_id: 1,
+        subject: "x",
+      });
+    });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const calledUrl = new URL(fetchSpy.mock.calls[0][0] as string);
+    expect(calledUrl.searchParams.has("notify_employee_ids")).toBe(false);
+  });
+});

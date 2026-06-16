@@ -140,24 +140,29 @@ export const markOrderBilledTool: Tool = {
 export const addClientNoteTool: Tool = {
   name: "add_client_note",
   description:
-    "Add a ClientNote (CRM activity). Disabled when IFLOW_READ_ONLY=1. Requires confirmation.",
+    "Add a ClientNote (CRM activity). Disabled when IFLOW_READ_ONLY=1. Requires confirmation. Optional notify_employee_ids = employee ids to receive the reminder; defaults to the note author so a reminder always has a recipient.",
   inputSchema: z.object({
     client_id: z.number().int().positive(),
     subject: z.string().min(1).max(512),
     text: z.string().optional(),
     note_type_id: z.number().int().positive().optional(),
     reminder_date: isoDateTime.optional(),
+    notify_employee_ids: z.array(z.number().int().positive()).optional(),
     confirm: z.boolean().optional(),
   }),
   execute: async (args): Promise<MCPToolResult> => {
     if (config.IFLOW_READ_ONLY) return readOnlyError("add_client_note");
-    const { confirm, ...rest } = args;
+    const { confirm, notify_employee_ids, ...rest } = args;
+    const query = flatten(rest as Record<string, unknown>);
+    if (Array.isArray(notify_employee_ids) && notify_employee_ids.length > 0) {
+      query.notify_employee_ids = (notify_employee_ids as number[]).join(",");
+    }
     const result = await iflowClient.fetch<{
       ok?: boolean;
       error?: string;
       note_id?: number;
     }>("add_client_note", "GET", undefined, {
-      query: flatten(rest as Record<string, unknown>),
+      query,
       confirmToken: confirm ? "mcp_confirm=1" : undefined,
     });
     return {
