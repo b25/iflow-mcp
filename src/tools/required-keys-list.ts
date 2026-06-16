@@ -79,6 +79,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "accounting_invoices_issued",
   "accounting_stock_balance",
   "accounting_intrastat",
+  // document send/communication history
+  "document_communications",
   // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
   "update_order_status",
   "mark_order_finished",
