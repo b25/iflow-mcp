@@ -45,6 +45,7 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_orders",
   "list_offers",
   "list_invoices",
+  "list_receipts",
   "list_suppliers",
   "list_products_search",
   "list_clients_search",
