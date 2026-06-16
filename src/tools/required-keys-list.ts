@@ -109,6 +109,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "get_equipment_service",
   // credit/sold limit history per client (block/unblock, auto + manual)
   "client_credit_limit_history",
+  // offer version/revision history (author/status/total per version)
+  "list_offer_versions",
   // client portal login account (email/username, last login, login history)
   "get_client_portal_account",
   // supplier purchase orders
