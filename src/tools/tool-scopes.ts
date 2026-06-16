@@ -31,6 +31,11 @@ export function requiredScopesForTool(toolName: string): string[] | null {
   if (toolName === "add_offer_comment" || toolName === "create_opportunity") {
     return ["tools:offers:write"];
   }
+  // tag_entity spans clients/orders/offers/invoices, so it sits behind a
+  // generic write scope rather than any single per-resource write scope.
+  if (toolName === "tag_entity") {
+    return ["tools:write"];
+  }
   // Analytics / financial / accounting READ tools.
   // Mirrors the Django `myintranet/site/api/mobile/rbac.py` TOOL_RULES capability
   // gating intent (margin/financials/team-sensitive reports + accounting) at the

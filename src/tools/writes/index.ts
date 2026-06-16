@@ -311,3 +311,79 @@ export const createOpportunityTool: Tool = {
     };
   },
 };
+
+export const tagEntityTool: Tool = {
+  name: "tag_entity",
+  description:
+    "Add or remove tags on a CRM entity: client (Clienti), order (Orders), " +
+    "offer (Offer) or invoice (FiscalBill). Resolve entity_id via the matching " +
+    "listing first; never invent it. tags is a list of tag ids or names (each " +
+    "resolved by id first, else by case-insensitive trimmed name). action is " +
+    "'add' (default) or 'remove'. add is idempotent (already-attached tags are " +
+    "skipped). For unknown tag NAMES on add: with create_missing=false (default) " +
+    "they are returned in tags_missing (NOT created) — ask the user, then re-call " +
+    "with create_missing=true to create (default color) and attach them. remove " +
+    "detaches resolved/attached tags (tags_removed); names not found or not " +
+    "attached are returned in tags_not_found (not an error). The add path is " +
+    "journaled by the existing tag signal; removes write their own audit row. " +
+    "Disabled when IFLOW_READ_ONLY=1. Requires confirmation.",
+  inputSchema: z.object({
+    entity_type: z.enum(["client", "order", "offer", "invoice"]),
+    entity_id: z.number().int().positive(),
+    tags: z
+      .array(z.union([z.number().int().positive(), z.string().min(1)]))
+      .min(1),
+    action: z.enum(["add", "remove"]).optional(),
+    create_missing: z.boolean().optional(),
+    confirm: z.boolean().optional(),
+  }),
+  execute: async (args): Promise<MCPToolResult> => {
+    if (config.IFLOW_READ_ONLY) return readOnlyError("tag_entity");
+    const { confirm, tags, create_missing, ...rest } = args;
+    const query = flatten(rest as Record<string, unknown>);
+    query.tags = JSON.stringify(tags);
+    if (create_missing !== undefined) {
+      query.create_missing = create_missing ? "true" : "false";
+    }
+    const result = await iflowClient.fetch<{
+      ok?: boolean;
+      error?: { code?: string; message?: string };
+      action?: string;
+      tags_attached?: unknown[];
+      tags_created?: unknown[];
+      tags_missing?: unknown[];
+      tags_removed?: unknown[];
+      tags_not_found?: unknown[];
+    }>("tag_entity", "GET", undefined, {
+      query,
+      confirmToken: confirm ? "mcp_confirm=1" : undefined,
+    });
+    const errored = result.ok === false || result.error != null;
+    let text: string;
+    if (errored) {
+      const err = result.error;
+      text = `Failed: ${err?.message ?? err?.code ?? "unknown"}.`;
+    } else if (result.action === "remove") {
+      const removed = (result.tags_removed ?? []).length;
+      const nf = (result.tags_not_found ?? []).length;
+      text =
+        `Removed ${removed} tag(s) from ${args.entity_type} ${args.entity_id}` +
+        (nf ? `; ${nf} not found/attached.` : ".");
+    } else {
+      const attached = (result.tags_attached ?? []).length;
+      const created = (result.tags_created ?? []).length;
+      const missing = (result.tags_missing ?? []).length;
+      text =
+        `Tagged ${args.entity_type} ${args.entity_id}: ${attached} added` +
+        (created ? `, ${created} created` : "") +
+        (missing
+          ? `; ${missing} missing (re-call with create_missing=true to create).`
+          : ".");
+    }
+    return {
+      content: [{ type: "text", text }],
+      structuredContent: result as Record<string, unknown>,
+      isError: errored,
+    };
+  },
+};
