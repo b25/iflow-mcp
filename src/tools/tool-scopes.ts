@@ -31,6 +31,9 @@ export function requiredScopesForTool(toolName: string): string[] | null {
   if (toolName === "add_offer_comment" || toolName === "create_opportunity") {
     return ["tools:offers:write"];
   }
+  if (toolName === "create_task") {
+    return ["tools:tasks:write"];
+  }
   // tag_entity spans clients/orders/offers/invoices, so it sits behind a
   // generic write scope rather than any single per-resource write scope.
   if (toolName === "tag_entity") {

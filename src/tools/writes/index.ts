@@ -312,6 +312,128 @@ export const createOpportunityTool: Tool = {
   },
 };
 
+const taskAttachment = z
+  .object({
+    nume_fisier: z.string().min(1),
+    mime_type: z.string().optional(),
+    continut_base64: z.string().optional(),
+    url: z.string().optional(),
+  })
+  .passthrough();
+
+export const createTaskTool: Tool = {
+  name: "create_task",
+  description:
+    "Create a task (sarcina) inside a task-flow, aligned to the desktop " +
+    "'Creeaza o sarcina' form. Required: titlu. flux_id is required ONLY when " +
+    "several active task-flows exist; with exactly one active flow it is " +
+    "auto-selected silently. If multiple exist and flux_id is omitted the call " +
+    "returns a flux_required error listing available_flows (id + name) — ask " +
+    "the user, then re-call with a real flux_id. Optional (set only when " +
+    "provided; no invented defaults): descriere, responsabil (assignee id or " +
+    "name, resolved to an active employee), comanda (order id, validated), " +
+    "confidentialitate (privat|public), prioritate (scazut|mediu|ridicat|" +
+    "critic), termen_limita (date or datetime), timp_estimat (minutes), memento " +
+    "(datetime), memento_angajati (employee ids/names), frecventa (fara|zilnic|" +
+    "saptamanal|lunar|trimestrial|semestrial|anual), progres (0..100), etichete " +
+    "(existing TasksTag ids/names; unmatched returned in tags_missing, NOT " +
+    "created), documente (each nume_fisier + continut_base64 or url; upload " +
+    "failure does not roll back). Disabled when IFLOW_READ_ONLY=1. Requires " +
+    "confirmation.",
+  inputSchema: z.object({
+    titlu: z.string().min(1),
+    flux_id: z.number().int().positive().optional(),
+    descriere: z.string().optional(),
+    responsabil: z.union([z.number().int().positive(), z.string()]).optional(),
+    comanda: z.number().int().positive().optional(),
+    confidentialitate: z.enum(["privat", "public"]).optional(),
+    prioritate: z.enum(["scazut", "mediu", "ridicat", "critic"]).optional(),
+    termen_limita: z.string().optional(),
+    timp_estimat: z.number().int().nonnegative().optional(),
+    memento: z.string().optional(),
+    memento_angajati: z
+      .array(z.union([z.number().int().positive(), z.string()]))
+      .optional(),
+    frecventa: z
+      .enum([
+        "fara",
+        "zilnic",
+        "saptamanal",
+        "lunar",
+        "trimestrial",
+        "semestrial",
+        "anual",
+      ])
+      .optional(),
+    progres: z.number().int().min(0).max(100).optional(),
+    etichete: z
+      .array(z.union([z.number().int().positive(), z.string()]))
+      .optional(),
+    documente: z.array(taskAttachment).optional(),
+    confirm: z.boolean().optional(),
+  }),
+  execute: async (args): Promise<MCPToolResult> => {
+    if (config.IFLOW_READ_ONLY) return readOnlyError("create_task");
+    const {
+      confirm,
+      responsabil,
+      memento_angajati,
+      etichete,
+      documente,
+      ...rest
+    } = args;
+    const query = flatten(rest as Record<string, unknown>);
+    if (responsabil != null) {
+      query.responsabil = responsabil as string | number;
+    }
+    if (memento_angajati !== undefined) {
+      query.memento_angajati = JSON.stringify(memento_angajati);
+    }
+    if (etichete !== undefined) query.etichete = JSON.stringify(etichete);
+    if (documente !== undefined) query.documente = JSON.stringify(documente);
+    const result = await iflowClient.fetch<{
+      ok?: boolean;
+      error?: { code?: string; message?: string; available_flows?: unknown[] };
+      task_id?: number;
+      flux_id?: number;
+      flux_name?: string;
+      tags_missing?: unknown[];
+    }>("create_task", "GET", undefined, {
+      query,
+      confirmToken: confirm ? "mcp_confirm=1" : undefined,
+    });
+    const errored = result.ok === false || result.error != null;
+    let text: string;
+    if (errored) {
+      const err = result.error;
+      if (err?.code === "flux_required") {
+        const flows = (err.available_flows ?? []) as Array<{
+          id?: number;
+          name?: string;
+        }>;
+        const list = flows
+          .map((f) => `${f.id}: ${f.name ?? ""}`)
+          .join(", ");
+        text =
+          `Multiple task-flows exist; pass flux_id. Available: ${list}.`;
+      } else {
+        text = `Failed: ${err?.message ?? err?.code ?? "unknown"}.`;
+      }
+    } else {
+      const missing = (result.tags_missing ?? []).length;
+      text =
+        `Task created (id=${result.task_id ?? "?"}) in flow ` +
+        `${result.flux_name ?? result.flux_id ?? "?"}` +
+        (missing ? `; ${missing} tag(s) missing.` : ".");
+    }
+    return {
+      content: [{ type: "text", text }],
+      structuredContent: result as Record<string, unknown>,
+      isError: errored,
+    };
+  },
+};
+
 export const tagEntityTool: Tool = {
   name: "tag_entity",
   description:

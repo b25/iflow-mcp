@@ -117,6 +117,7 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "add_offer_comment",
   "create_opportunity",
   "tag_entity",
+  "create_task",
   "create_client",
   "create_product",
   "update_product",

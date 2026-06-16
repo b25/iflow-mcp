@@ -112,6 +112,7 @@ import {
   addOfferCommentTool,
   createOpportunityTool,
   tagEntityTool,
+  createTaskTool,
 } from "./writes/index.js";
 import {
   createClientTool,
@@ -233,6 +234,7 @@ export function registerAllTools() {
   registry.register(addOfferCommentTool);
   registry.register(createOpportunityTool);
   registry.register(tagEntityTool);
+  registry.register(createTaskTool);
   registry.register(createClientTool);
   registry.register(createProductTool);
   registry.register(updateProductTool);
