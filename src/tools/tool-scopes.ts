@@ -53,6 +53,7 @@ export function requiredScopesForTool(toolName: string): string[] | null {
     toolName === "report_sales" ||
     toolName === "report_total_sales" ||
     toolName === "report_dashboard_card" ||
+    toolName === "mobile_dashboard" ||
     toolName === "report_quantity" ||
     toolName === "top_products_by_margin" ||
     // team-performance reports

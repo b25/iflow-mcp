@@ -93,6 +93,7 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "report_equipments_gantt",
   "report_stock_purchases",
   "report_dashboard_card",
+  "mobile_dashboard",
   "accounting_partner_balance",
   "accounting_invoices_issued",
   "accounting_stock_balance",

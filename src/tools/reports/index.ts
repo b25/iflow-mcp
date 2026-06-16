@@ -182,6 +182,16 @@ export const reportDashboardCardTool: Tool = {
   execute: (args) => runReport("report_dashboard_card", args as Record<string, unknown>),
 };
 
+export const mobileDashboardTool: Tool = {
+  name: "mobile_dashboard",
+  description:
+    "Role-aware trend dashboard for the acting user (same set the mobile home screen shows): the KPI/trend cards visible for their role tier (owner/manager/agent) with current value, previous-bucket value, delta_pct, direction and a good_direction tint hint, plus the resolved period. Agents see only their own personal metrics. Arg: range (7d|1m|3m|6m|1y, default 7d).",
+  inputSchema: z.object({
+    range: z.enum(["7d", "1m", "3m", "6m", "1y"]).optional(),
+  }),
+  execute: (args) => runReport("mobile_dashboard", args as Record<string, unknown>),
+};
+
 export const accountingPartnerBalanceTool: Tool = {
   name: "accounting_partner_balance",
   description:

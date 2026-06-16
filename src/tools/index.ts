@@ -124,6 +124,7 @@ import {
   reportEquipmentsGanttTool,
   reportStockPurchasesTool,
   reportDashboardCardTool,
+  mobileDashboardTool,
   accountingPartnerBalanceTool,
   accountingInvoicesIssuedTool,
   accountingStockBalanceTool,
@@ -268,6 +269,7 @@ export function registerAllTools() {
   registry.register(reportEquipmentsGanttTool);
   registry.register(reportStockPurchasesTool);
   registry.register(reportDashboardCardTool);
+  registry.register(mobileDashboardTool);
   registry.register(accountingPartnerBalanceTool);
   registry.register(accountingInvoicesIssuedTool);
   registry.register(accountingStockBalanceTool);
