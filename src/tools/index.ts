@@ -85,6 +85,7 @@ import { clientCreditLimitHistoryTool } from "./lookup/client-credit-limit-histo
 import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
 import { listEmailCampaignsTool } from "./lookup/email-campaigns.js";
+import { listCorrespondenceTool } from "./lookup/correspondence.js";
 import { listEmailFlowsTool, getEmailFlowTool } from "./lookup/email-flows.js";
 import {
   listFormsTool,
@@ -218,6 +219,7 @@ export function registerAllTools() {
   registry.register(clientPortalAccountTool);
   registry.register(listSupplierOrdersTool);
   registry.register(listEmailCampaignsTool);
+  registry.register(listCorrespondenceTool);
   registry.register(listEmailFlowsTool);
   registry.register(getEmailFlowTool);
   registry.register(listFormsTool);
