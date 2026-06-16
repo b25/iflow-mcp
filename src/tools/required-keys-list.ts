@@ -103,6 +103,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_employee_leave",
   // client negotiated discounts / special prices
   "list_client_discounts",
+  // service-section equipment per client (serviced machines + intervention history)
+  "list_client_service_equipment",
   // supplier purchase orders
   "list_supplier_orders",
   // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
