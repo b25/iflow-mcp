@@ -105,6 +105,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_client_discounts",
   // service-section equipment per client (serviced machines + intervention history)
   "list_client_service_equipment",
+  // credit/sold limit history per client (block/unblock, auto + manual)
+  "client_credit_limit_history",
   // supplier purchase orders
   "list_supplier_orders",
   // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
