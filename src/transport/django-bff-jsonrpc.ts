@@ -11,6 +11,22 @@ import { toolInputToJsonSchema } from "../tools/tool-input-json-schema.js";
 import type { MCPTokenClaims } from "../auth/jwt.js";
 import { mcpAuthContext } from "../context/mcp-auth-context.js";
 
+/**
+ * Parse the inbound X-IFlow-Actor-User-Id header into a Django user PK string.
+ * Returns the digit string, or undefined if the header is missing/invalid.
+ * trim() mirrors Django's request.META.get(...).strip() before digit validation,
+ * so a whitespace-padded value forwarded by a proxy still resolves consistently.
+ */
+export function extractActorUserId(
+  rawActor: string | string[] | undefined
+): string | undefined {
+  if (typeof rawActor !== "string") {
+    return undefined;
+  }
+  const trimmed = rawActor.trim();
+  return /^[0-9]+$/.test(trimmed) ? trimmed : undefined;
+}
+
 function structuredToRecord(data: unknown): Record<string, unknown> | undefined {
   if (data === undefined) return undefined;
   if (data !== null && typeof data === "object" && !Array.isArray(data)) {
@@ -25,11 +41,7 @@ function runWithMcpAuth(
   fn: () => Promise<void>
 ): Promise<void> {
   const requestId = (req as Request & { requestId?: string }).requestId;
-  const rawActor = req.headers["x-iflow-actor-user-id"];
-  const actorUserId =
-    typeof rawActor === "string" && /^[0-9]+$/.test(rawActor.trim())
-      ? rawActor.trim()
-      : undefined;
+  const actorUserId = extractActorUserId(req.headers["x-iflow-actor-user-id"]);
   return mcpAuthContext.run(
     {
       scope: claims.scope,

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import type { AppConfig } from "../src/iflow/parse-env.js";
 import { IFlowClient } from "../src/iflow/client.js";
 import { mcpAuthContext } from "../src/context/mcp-auth-context.js";
+import { extractActorUserId } from "../src/transport/django-bff-jsonrpc.js";
 
 const testCfg: AppConfig = {
   IFLOW_BASE_URL: "https://ok.example.com",
@@ -26,6 +27,40 @@ const testCfg: AppConfig = {
   IFLOW_MCP_TRANSPORT: "stdio",
   IFLOW_MCP_INTEGRATION_UUID: undefined,
 };
+
+describe("extractActorUserId", () => {
+  it('parses a plain digit string', () => {
+    expect(extractActorUserId("42")).toBe("42");
+  });
+
+  it('trims surrounding whitespace and parses', () => {
+    expect(extractActorUserId(" 42 ")).toBe("42");
+  });
+
+  it('returns undefined for alphabetic string', () => {
+    expect(extractActorUserId("abc")).toBeUndefined();
+  });
+
+  it('returns undefined for decimal fraction', () => {
+    expect(extractActorUserId("4.2")).toBeUndefined();
+  });
+
+  it('returns undefined for negative number', () => {
+    expect(extractActorUserId("-1")).toBeUndefined();
+  });
+
+  it('returns undefined for unicode superscript digit (U+00B2)', () => {
+    expect(extractActorUserId("²")).toBeUndefined();
+  });
+
+  it('returns undefined for undefined input', () => {
+    expect(extractActorUserId(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined for array-valued header', () => {
+    expect(extractActorUserId(["42", "43"])).toBeUndefined();
+  });
+});
 
 describe("X-IFlow-Actor-User-Id forwarding", () => {
   afterEach(() => {
