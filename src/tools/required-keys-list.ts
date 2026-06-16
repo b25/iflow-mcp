@@ -112,6 +112,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   // supplier purchase orders
   "list_supplier_orders",
   "list_email_campaigns",
+  "list_email_flows",
+  "get_email_flow",
   // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
   "update_order_status",
   "mark_order_finished",
