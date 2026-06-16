@@ -56,7 +56,7 @@ describe("phase 4 assistant tools — execute via mocked fetch", () => {
     // Single body that satisfies all four assistant tools — they each look at
     // a different subset of fields, so we just return everything.
     const body = {
-      overview: "iFlow ERP",
+      overview: "iFlows ERP",
       language: "ro",
       top_questions: ["Q1", "Q2"],
       focus: [],
@@ -95,7 +95,7 @@ describe("phase 4 assistant tools — execute via mocked fetch", () => {
     await mcpAuthContext.run({ scope: "tools:erp:read" }, async () => {
       const out = await registry.executeTool("mcp_assistant_intro", { language: "ro" });
       expect(out.isError).not.toBe(true);
-      expect((out.content?.[0] as { text?: string }).text).toContain("iFlow ERP");
+      expect((out.content?.[0] as { text?: string }).text).toContain("iFlows ERP");
     });
   });
 

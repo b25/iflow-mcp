@@ -96,7 +96,7 @@ export function createConfiguredMcpServer(): Server {
         },
         {
           name: "iflows",
-          description: "Grouped iFlow tool overview + guided next step",
+          description: "Grouped iFlows tool overview + guided next step",
           arguments: [
             {
               name: "language",

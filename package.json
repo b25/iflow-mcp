@@ -1,7 +1,7 @@
 {
   "name": "iflows-mcp",
   "version": "0.1.4",
-  "description": "iflow MCP server for Claude, OpenAI, and Gemini",
+  "description": "iFlows MCP server for Claude, OpenAI, and Gemini",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/b25/iflows-mcp.git"

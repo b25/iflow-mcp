@@ -42,6 +42,28 @@ describe("additional CRUD write tools — inputSchema", () => {
     expect(tool.inputSchema.safeParse({ name: "Acme Product" }).success).toBe(false);
   });
 
+  it.each(["create_product", "update_product"])(
+    "%s allows price_acquisition = 0 and rejects negatives",
+    (key) => {
+      const tool = registry.getTool(key)!;
+      const base = {
+        name: "Acme Product",
+        category: "cat",
+        subcategory: "sub",
+        provider: "prov",
+        product_currency: "RON",
+        um: "buc",
+        acquisition_cost_source: "PRODUCT",
+        large_business_addition: 2,
+        medium_business_addition: 3,
+        small_business_addition: 4,
+        dimension_um: "mm",
+      };
+      expect(tool.inputSchema.safeParse({ ...base, price_acquisition: 0 }).success).toBe(true);
+      expect(tool.inputSchema.safeParse({ ...base, price_acquisition: -1 }).success).toBe(false);
+    }
+  );
+
   it("create_administration validates name", () => {
     const tool = registry.getTool("create_administration")!;
     expect(tool.inputSchema.safeParse({ name: "Main Gestiune" }).success).toBe(true);

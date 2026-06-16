@@ -39,7 +39,7 @@ function asQuery(
 export const mcpAssistantIntroTool: Tool = {
   name: "mcp_assistant_intro",
   description:
-    "Start here. Returns an iFlow business overview, the main topics (orders/offers/clients/products/finance/workflow/diagnose), top user questions and the assistant flow (intro -> dictionary -> clarify -> plan). Call this first when the user asks 'what can you do?' or starts a new conversation.",
+    "Start here. Returns an iFlows business overview, the main topics (orders/offers/clients/products/finance/workflow/diagnose), top user questions and the assistant flow (intro -> dictionary -> clarify -> plan). Call this first when the user asks 'what can you do?' or starts a new conversation.",
   inputSchema: z.object({
     topic: z.enum(TOPICS).optional(),
     language,
@@ -66,7 +66,7 @@ export const mcpAssistantIntroTool: Tool = {
 export const mcpDataDictionaryTool: Tool = {
   name: "mcp_data_dictionary",
   description:
-    "Describe iFlow data entities (fields, statuses, enums, related tools). Use to learn what fields exist before constructing filters. Pass `entity` for a single one or omit for all.",
+    "Describe iFlows data entities (fields, statuses, enums, related tools). Use to learn what fields exist before constructing filters. Pass `entity` for a single one or omit for all.",
   inputSchema: z.object({
     entity: z.enum(ENTITIES).optional(),
     language,
