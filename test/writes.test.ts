@@ -170,3 +170,69 @@ describe("add_client_note — notify_employee_ids forwarding", () => {
     expect(calledUrl.searchParams.has("notify_employee_ids")).toBe(false);
   });
 });
+
+describe("create_order — Django registry contract (client/products JSON via GET)", () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+  let originalReadOnly: boolean;
+
+  beforeAll(() => {
+    originalReadOnly = config.IFLOW_READ_ONLY;
+    fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async () => {
+      return new Response(JSON.stringify({ ok: true, order_number: "ORD-1" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    });
+    (config as { IFLOW_READ_ONLY: boolean }).IFLOW_READ_ONLY = false;
+  });
+
+  afterAll(() => {
+    (config as { IFLOW_READ_ONLY: boolean }).IFLOW_READ_ONLY = originalReadOnly;
+    fetchSpy.mockRestore();
+  });
+
+  beforeEach(() => {
+    registry.clear();
+    registerAllTools();
+    fetchSpy.mockClear();
+  });
+
+  it("issues a GET with JSON-encoded client/products, date_order, and confirm token", async () => {
+    const client = { name: "ACME", tax_code: "RO123" };
+    const products = [{ id: 5, quantity: 2, vat: 21 }];
+    await mcpAuthContext.run({ scope: "tools:orders:write" }, async () => {
+      await registry.executeTool("create_order", {
+        client,
+        products,
+        date_order: "2026-06-16",
+        confirm: true,
+      });
+    });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [calledUrl, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    expect(init.method).toBe("GET");
+    const url = new URL(calledUrl);
+    expect(url.searchParams.get("client")).toBe(JSON.stringify(client));
+    expect(url.searchParams.get("products")).toBe(JSON.stringify(products));
+    expect(url.searchParams.get("date_order")).toBe("2026-06-16");
+    // currency must NOT be sent
+    expect(url.searchParams.has("currency")).toBe(false);
+    // confirm token is sent as a header
+    const headers = init.headers as Record<string, string>;
+    expect(headers["X-MCP-Confirm-Token"]).toBe("mcp_confirm=1");
+  });
+
+  it("does not send the confirm token when confirm is omitted", async () => {
+    await mcpAuthContext.run({ scope: "tools:orders:write" }, async () => {
+      await registry.executeTool("create_order", {
+        client: { name: "ACME" },
+        products: [{ code: "SKU1", quantity: 1 }],
+        date_order: "2026-06-16",
+      });
+    });
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const headers = init.headers as Record<string, string>;
+    expect(headers["X-MCP-Confirm-Token"]).toBeUndefined();
+  });
+});
