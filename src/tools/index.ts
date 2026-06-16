@@ -108,6 +108,7 @@ import {
   markOrderBilledTool,
   addClientNoteTool,
   addOfferCommentTool,
+  createOpportunityTool,
 } from "./writes/index.js";
 import {
   createClientTool,
@@ -225,6 +226,7 @@ export function registerAllTools() {
   registry.register(markOrderBilledTool);
   registry.register(addClientNoteTool);
   registry.register(addOfferCommentTool);
+  registry.register(createOpportunityTool);
   registry.register(createClientTool);
   registry.register(createProductTool);
   registry.register(updateProductTool);

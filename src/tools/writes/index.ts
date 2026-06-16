@@ -216,3 +216,98 @@ export const addOfferCommentTool: Tool = {
     };
   },
 };
+
+const opportunityLine = z
+  .object({
+    produs_id: z.number().int().positive(),
+    latime: z.number().optional(),
+    lungime: z.number().optional(),
+    bucati: z.number().optional(),
+    cantitate: z.number().optional(),
+    pret_unitar_fara_tva: z.number().optional(),
+  })
+  .passthrough();
+
+const opportunityAttachment = z
+  .object({
+    nume_fisier: z.string().min(1),
+    mime_type: z.string().optional(),
+    continut_base64: z.string().optional(),
+    url: z.string().optional(),
+  })
+  .passthrough();
+
+export const createOpportunityTool: Tool = {
+  name: "create_opportunity",
+  description:
+    "Create a new opportunity (persisted as an Offer/Oferta), aligned to the " +
+    "'Oportunitate Noua' form. Ideal for turning an email into an offer. " +
+    "Required: client_id (resolve via list_clients_search by email/name), titlu, " +
+    "linii (>=1 item, each with produs_id). Optional: flux_id (default workflow), " +
+    "external_ref (idempotency key; a repeat returns the existing opportunity with " +
+    "already_existed=true), data (default today), valabilitate (default data+30d), " +
+    "valuta (default instance currency), cota_tva (fraction 0.21 or percent 21; " +
+    "default firm VAT), specificatii (email body, saved verbatim), persoana_contact " +
+    "(contact person id or name), etichete (existing OfferTag ids/names), atasamente " +
+    "(each nume_fisier + continut_base64 or url; upload failure does not roll back). " +
+    "Per-line numerics omitted default to 1 ('de revizuit'). Disabled when " +
+    "IFLOW_READ_ONLY=1. Requires confirmation.",
+  inputSchema: z.object({
+    client_id: z.number().int().positive(),
+    titlu: z.string().min(1),
+    linii: z.array(opportunityLine).min(1),
+    flux_id: z.number().int().positive().optional(),
+    external_ref: z.string().optional(),
+    data: z.string().optional(),
+    valabilitate: z.string().optional(),
+    valuta: z.string().optional(),
+    cota_tva: z.number().optional(),
+    specificatii: z.string().optional(),
+    persoana_contact: z.union([z.number().int().positive(), z.string()]).optional(),
+    etichete: z.array(z.union([z.number().int().positive(), z.string()])).optional(),
+    atasamente: z.array(opportunityAttachment).optional(),
+    confirm: z.boolean().optional(),
+  }),
+  execute: async (args): Promise<MCPToolResult> => {
+    if (config.IFLOW_READ_ONLY) return readOnlyError("create_opportunity");
+    const {
+      confirm,
+      linii,
+      etichete,
+      atasamente,
+      persoana_contact,
+      ...rest
+    } = args;
+    const query = flatten(rest as Record<string, unknown>);
+    query.linii = JSON.stringify(linii);
+    if (etichete !== undefined) query.etichete = JSON.stringify(etichete);
+    if (atasamente !== undefined) query.atasamente = JSON.stringify(atasamente);
+    if (persoana_contact != null) {
+      query.persoana_contact = persoana_contact as string | number;
+    }
+    const result = await iflowClient.fetch<{
+      ok?: boolean;
+      error?: { code?: string; message?: string };
+      opportunity_id?: number;
+      already_existed?: boolean;
+    }>("create_opportunity", "GET", undefined, {
+      query,
+      confirmToken: confirm ? "mcp_confirm=1" : undefined,
+    });
+    const errored = result.ok === false || result.error != null;
+    let text: string;
+    if (errored) {
+      const err = result.error;
+      text = `Failed: ${err?.message ?? err?.code ?? "unknown"}.`;
+    } else if (result.already_existed) {
+      text = `Opportunity already exists (id=${result.opportunity_id ?? "?"}).`;
+    } else {
+      text = `Opportunity created (id=${result.opportunity_id ?? "?"}).`;
+    }
+    return {
+      content: [{ type: "text", text }],
+      structuredContent: result as Record<string, unknown>,
+      isError: errored,
+    };
+  },
+};

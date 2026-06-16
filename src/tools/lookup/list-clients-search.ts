@@ -7,9 +7,15 @@ const tagIds = z.union([z.array(z.number().int().positive()), z.string()]).optio
 export const listClientsSearchTool: Tool = {
   name: "list_clients_search",
   description:
-    "Search clients with filters: q (name/alias/code/CIF), tag_ids, client_type_id, district, locality, is_active, limit, offset.",
+    "Search clients with filters: q (name/alias/code/CIF), email (client's own " +
+    "email or a contact person's email; case-insensitive exact match; returns " +
+    "contact_match {nume,email}), tag_ids, client_type_id, district, locality, " +
+    "is_active, limit, offset. q and email combine with AND. 0 results -> tell " +
+    "the user 'client negasit'; more than one -> 'mai multi clienti potriviti, " +
+    "alege manual'.",
   inputSchema: z.object({
     q: z.string().optional(),
+    email: z.string().optional(),
     tag_ids: tagIds,
     client_type_id: z.number().int().nonnegative().optional(),
     district: z.string().optional(),
@@ -21,6 +27,7 @@ export const listClientsSearchTool: Tool = {
   execute: async (args): Promise<MCPToolResult> => {
     const q: Record<string, string | number | boolean> = {};
     if (args.q) q.q = args.q;
+    if (args.email) q.email = args.email;
     if (Array.isArray(args.tag_ids)) q.tag_ids = (args.tag_ids as number[]).join(",");
     else if (typeof args.tag_ids === "string") q.tag_ids = args.tag_ids;
     if (args.client_type_id != null) q.client_type_id = args.client_type_id;

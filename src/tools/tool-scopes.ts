@@ -28,7 +28,7 @@ export function requiredScopesForTool(toolName: string): string[] | null {
   if (toolName === "add_client_note") {
     return ["tools:clients:write"];
   }
-  if (toolName === "add_offer_comment") {
+  if (toolName === "add_offer_comment" || toolName === "create_opportunity") {
     return ["tools:offers:write"];
   }
   // Analytics / financial / accounting READ tools.
