@@ -7,9 +7,15 @@ const isoDateTime = z.string().min(8);
 export const listOffersTool: Tool = {
   name: "list_offers",
   description:
-    "Search/list offers with filters: client_id, status_id or status_tag (e.g. ACCEPTED/REJECTED), from/to (start_date), q, order_by, limit, offset.",
+    "Search/list offers with filters: client_id, employee_id (offer agent/owner), " +
+    "department_id, status_id or status_tag (one of ACTIVE/ACCEPTED/REJECTED/EXPIRED/" +
+    "OUT_OF_STOCK/ORDER/MORE_DETAILS/NEGOTIATION/POSTPONED), from/to (start_date), q, " +
+    "order_by, limit, offset. Each row exposes agent_id/agent_nume (the offer's agent) " +
+    "and a canonical status_tag.",
   inputSchema: z.object({
     client_id: z.number().int().positive().optional(),
+    employee_id: z.number().int().positive().optional(),
+    department_id: z.number().int().positive().optional(),
     status_id: z.number().int().positive().optional(),
     status_tag: z.string().optional(),
     from: isoDateTime.optional(),
