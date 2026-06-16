@@ -80,6 +80,8 @@ import { listBankRegisterTool } from "./lookup/list-bank-register.js";
 import { listSuppliersTool } from "./lookup/list-suppliers.js";
 import { listProductsSearchTool } from "./lookup/list-products-search.js";
 import { getProductCompositionTool } from "./lookup/product-composition.js";
+import { getProductPricingTool } from "./lookup/product-pricing.js";
+import { listMarkupsTool } from "./lookup/markups.js";
 import { listClientsSearchTool } from "./lookup/list-clients-search.js";
 import { documentCommunicationsTool } from "./lookup/document-communications.js";
 import { listEmployeeLeaveTool } from "./lookup/employee-leave.js";
@@ -240,6 +242,8 @@ export function registerAllTools() {
   registry.register(listSuppliersTool);
   registry.register(listProductsSearchTool);
   registry.register(getProductCompositionTool);
+  registry.register(getProductPricingTool);
+  registry.register(listMarkupsTool);
   registry.register(listClientsSearchTool);
   registry.register(documentCommunicationsTool);
   registry.register(listEmployeeLeaveTool);
