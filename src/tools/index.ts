@@ -87,6 +87,7 @@ import { listOfferVersionsTool } from "./lookup/list-offer-versions.js";
 import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
 import { listDeliveryNotesTool } from "./lookup/delivery-notes.js";
+import { listEtransportTool } from "./lookup/etransport.js";
 import { listOpportunitiesTool } from "./lookup/opportunities.js";
 import { listObjectivesTool } from "./lookup/objectives.js";
 import {
@@ -238,6 +239,7 @@ export function registerAllTools() {
   registry.register(clientPortalAccountTool);
   registry.register(listSupplierOrdersTool);
   registry.register(listDeliveryNotesTool);
+  registry.register(listEtransportTool);
   registry.register(listOpportunitiesTool);
   registry.register(listObjectivesTool);
   registry.register(listChatConversationsTool);

@@ -118,6 +118,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_supplier_orders",
   // delivery notes (avize de insotire a marfii)
   "list_delivery_notes",
+  // e-Transport (RO e-Transport / cod UIT)
+  "list_etransport",
   // sales opportunities (Vanzari -> Oportunitati)
   "list_opportunities",
   // management objectives (Management Obiective)
