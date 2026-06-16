@@ -85,6 +85,11 @@ import { getEquipmentServiceTool } from "./lookup/equipment-service.js";
 import { clientCreditLimitHistoryTool } from "./lookup/client-credit-limit-history.js";
 import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
+import {
+  listChatConversationsTool,
+  getChatConversationTool,
+  chatResponseTimeReportTool,
+} from "./lookup/chat.js";
 import { listEmailCampaignsTool } from "./lookup/email-campaigns.js";
 import { listCorrespondenceTool } from "./lookup/correspondence.js";
 import { listGeneratedDocumentsTool } from "./lookup/generated_documents.js";
@@ -226,6 +231,9 @@ export function registerAllTools() {
   registry.register(clientCreditLimitHistoryTool);
   registry.register(clientPortalAccountTool);
   registry.register(listSupplierOrdersTool);
+  registry.register(listChatConversationsTool);
+  registry.register(getChatConversationTool);
+  registry.register(chatResponseTimeReportTool);
   registry.register(listEmailCampaignsTool);
   registry.register(listCorrespondenceTool);
   registry.register(listGeneratedDocumentsTool);

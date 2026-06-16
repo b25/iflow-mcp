@@ -113,6 +113,10 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "get_client_portal_account",
   // supplier purchase orders
   "list_supplier_orders",
+  // WhatsApp Business / Chat module
+  "list_chat_conversations",
+  "get_chat_conversation",
+  "chat_response_time_report",
   "list_email_campaigns",
   "list_correspondence",
   "list_generated_documents",
