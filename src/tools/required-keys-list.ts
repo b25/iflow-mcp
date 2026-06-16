@@ -105,6 +105,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_client_discounts",
   // service-section equipment per client (serviced machines + intervention history)
   "list_client_service_equipment",
+  // service fiche of an internal production equipment (maintenance/interventions/problems)
+  "get_equipment_service",
   // credit/sold limit history per client (block/unblock, auto + manual)
   "client_credit_limit_history",
   // client portal login account (email/username, last login, login history)
