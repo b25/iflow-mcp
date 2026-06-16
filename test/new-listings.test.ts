@@ -155,4 +155,15 @@ describe("phase 1.2 listings tools — executeTool via mocked fetch", () => {
     expect(calledUrl).toContain("tag_ids=1%2C2%2C3");
     expect(calledUrl).toContain("q=abc");
   });
+
+  it("list_activity forwards via_integration=true as query param", async () => {
+    await mcpAuthContext.run({ scope: "tools:erp:read" }, async () => {
+      const out = await registry.executeTool("list_activity", {
+        via_integration: true,
+      });
+      expect(out.isError).not.toBe(true);
+    });
+    const calledUrl = String(fetchSpy.mock.calls.at(-1)![0]);
+    expect(calledUrl).toContain("via_integration=true");
+  });
 });
