@@ -121,6 +121,9 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_supplier_orders",
   // delivery notes (avize de insotire a marfii)
   "list_delivery_notes",
+  // production documents (bon de consum / nota de predare productie)
+  "list_consumption_vouchers",
+  "list_production_handovers",
   // e-Transport (RO e-Transport / cod UIT)
   "list_etransport",
   // courier shipments (AWB) - Fan Courier / GLS
