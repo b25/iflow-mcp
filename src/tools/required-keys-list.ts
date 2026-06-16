@@ -119,6 +119,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "get_client_portal_account",
   // supplier purchase orders
   "list_supplier_orders",
+  // recurring documents (recurrence configs on Orders)
+  "list_recurring_documents",
   // delivery notes (avize de insotire a marfii)
   "list_delivery_notes",
   // production documents (bon de consum / nota de predare productie)
