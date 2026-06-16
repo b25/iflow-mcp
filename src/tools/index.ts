@@ -84,6 +84,7 @@ import { listClientServiceEquipmentTool } from "./lookup/client-service-equipmen
 import { clientCreditLimitHistoryTool } from "./lookup/client-credit-limit-history.js";
 import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
+import { listEmailCampaignsTool } from "./lookup/email-campaigns.js";
 import { listPurchasesTool } from "./lookup/list-purchases.js";
 import { listStockMovementsTool } from "./lookup/list-stock-movements.js";
 import { listActivityTool } from "./lookup/list-activity.js";
@@ -210,6 +211,7 @@ export function registerAllTools() {
   registry.register(clientCreditLimitHistoryTool);
   registry.register(clientPortalAccountTool);
   registry.register(listSupplierOrdersTool);
+  registry.register(listEmailCampaignsTool);
   registry.register(listPurchasesTool);
   registry.register(listStockMovementsTool);
   registry.register(listActivityTool);
