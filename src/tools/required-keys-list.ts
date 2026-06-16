@@ -101,6 +101,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "document_communications",
   // employee leave/absence
   "list_employee_leave",
+  // supplier purchase orders
+  "list_supplier_orders",
   // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
   "update_order_status",
   "mark_order_finished",
