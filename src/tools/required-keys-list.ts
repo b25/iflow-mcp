@@ -120,6 +120,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_delivery_notes",
   // e-Transport (RO e-Transport / cod UIT)
   "list_etransport",
+  // courier shipments (AWB) - Fan Courier / GLS
+  "list_shipments",
   // sales opportunities (Vanzari -> Oportunitati)
   "list_opportunities",
   // management objectives (Management Obiective)
