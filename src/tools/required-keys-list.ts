@@ -114,6 +114,10 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_email_campaigns",
   "list_email_flows",
   "get_email_flow",
+  // Marketing forms (FormTemplate / FormSubmittedData)
+  "list_forms",
+  "get_form",
+  "list_form_submissions",
   // Phase 3.3 writes (registered by ./writes/index.ts and ./writes/write-crud.ts)
   "update_order_status",
   "mark_order_finished",

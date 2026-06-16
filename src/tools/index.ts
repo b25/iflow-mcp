@@ -86,6 +86,11 @@ import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
 import { listEmailCampaignsTool } from "./lookup/email-campaigns.js";
 import { listEmailFlowsTool, getEmailFlowTool } from "./lookup/email-flows.js";
+import {
+  listFormsTool,
+  getFormTool,
+  listFormSubmissionsTool,
+} from "./lookup/forms.js";
 import { listPurchasesTool } from "./lookup/list-purchases.js";
 import { listStockMovementsTool } from "./lookup/list-stock-movements.js";
 import { listActivityTool } from "./lookup/list-activity.js";
@@ -215,6 +220,9 @@ export function registerAllTools() {
   registry.register(listEmailCampaignsTool);
   registry.register(listEmailFlowsTool);
   registry.register(getEmailFlowTool);
+  registry.register(listFormsTool);
+  registry.register(getFormTool);
+  registry.register(listFormSubmissionsTool);
   registry.register(listPurchasesTool);
   registry.register(listStockMovementsTool);
   registry.register(listActivityTool);
