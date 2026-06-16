@@ -119,6 +119,8 @@ export const REQUIRED_IFLOW_API_POINT_KEYS = [
   "list_delivery_notes",
   // sales opportunities (Vanzari -> Oportunitati)
   "list_opportunities",
+  // management objectives (Management Obiective)
+  "list_objectives",
   // WhatsApp Business / Chat module
   "list_chat_conversations",
   "get_chat_conversation",

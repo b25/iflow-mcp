@@ -88,6 +88,7 @@ import { clientPortalAccountTool } from "./lookup/client-portal-account.js";
 import { listSupplierOrdersTool } from "./lookup/supplier-orders.js";
 import { listDeliveryNotesTool } from "./lookup/delivery-notes.js";
 import { listOpportunitiesTool } from "./lookup/opportunities.js";
+import { listObjectivesTool } from "./lookup/objectives.js";
 import {
   listChatConversationsTool,
   getChatConversationTool,
@@ -237,6 +238,7 @@ export function registerAllTools() {
   registry.register(listSupplierOrdersTool);
   registry.register(listDeliveryNotesTool);
   registry.register(listOpportunitiesTool);
+  registry.register(listObjectivesTool);
   registry.register(listChatConversationsTool);
   registry.register(getChatConversationTool);
   registry.register(chatResponseTimeReportTool);
