@@ -240,8 +240,9 @@ const opportunityAttachment = z
 export const createOpportunityTool: Tool = {
   name: "create_opportunity",
   description:
-    "Create a new opportunity (persisted as an Offer/Oferta), aligned to the " +
-    "'Oportunitate Noua' form. Ideal for turning an email into an offer. " +
+    "Create a new opportunity in Vanzari -> Oportunitati (a real Opportunity, " +
+    "status Noua; it appears in list_opportunities), aligned to the " +
+    "'Oportunitate Noua' form. Ideal for turning an email into an opportunity. " +
     "Required: client_id (resolve via list_clients_search by email/name), titlu, " +
     "linii (>=1 item, each with produs_id). Optional: flux_id (default workflow), " +
     "external_ref (idempotency key; a repeat returns the existing opportunity with " +
