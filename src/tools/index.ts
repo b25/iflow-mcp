@@ -161,6 +161,12 @@ import {
   createAdministrationTool,
 } from "./writes/write-crud.js";
 import {
+  createEmailCampaignTool,
+  setCampaignHtmlTool,
+  uploadCampaignAssetTool,
+  getEmailCampaignTool,
+} from "./writes/email-campaign.js";
+import {
   mcpAssistantIntroTool,
   mcpDataDictionaryTool,
   mcpClarifyTool,
@@ -314,6 +320,10 @@ export function registerAllTools() {
   registry.register(createProductTool);
   registry.register(updateProductTool);
   registry.register(createAdministrationTool);
+  registry.register(createEmailCampaignTool);
+  registry.register(setCampaignHtmlTool);
+  registry.register(uploadCampaignAssetTool);
+  registry.register(getEmailCampaignTool);
   registry.register(mcpAssistantIntroTool);
   registry.register(mcpDataDictionaryTool);
   registry.register(mcpClarifyTool);
