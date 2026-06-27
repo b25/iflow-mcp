@@ -167,6 +167,12 @@ import {
   getEmailCampaignTool,
 } from "./writes/email-campaign.js";
 import {
+  sendEmailCampaignTool,
+  scheduleEmailCampaignTool,
+  sendCampaignTestTool,
+  stopEmailCampaignTool,
+} from "./writes/email-campaign-send.js";
+import {
   mcpAssistantIntroTool,
   mcpDataDictionaryTool,
   mcpClarifyTool,
@@ -324,6 +330,10 @@ export function registerAllTools() {
   registry.register(setCampaignHtmlTool);
   registry.register(uploadCampaignAssetTool);
   registry.register(getEmailCampaignTool);
+  registry.register(sendEmailCampaignTool);
+  registry.register(scheduleEmailCampaignTool);
+  registry.register(sendCampaignTestTool);
+  registry.register(stopEmailCampaignTool);
   registry.register(mcpAssistantIntroTool);
   registry.register(mcpDataDictionaryTool);
   registry.register(mcpClarifyTool);
